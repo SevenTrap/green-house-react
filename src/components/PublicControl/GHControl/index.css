@@ -1,0 +1,17 @@
+.ant-row {
+  margin-bottom: 10px;
+}
+.ant-row:last-child {
+  margin-bottom: 0;
+}
+.changTemp {
+  padding-left: 30px!important;
+}
+.tempControlBox {
+  display: -webkit-flex;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+}
+/*# sourceMappingURL=index.css.map */
