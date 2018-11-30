@@ -27,14 +27,14 @@ class EditableCell extends Component {
     getInput = () => {
         if (this.props.dataIndex === 'role') {
             return (
-                <Select style={{width: 140}}>
+                <Select defaultValue='User' style={{width: '100%'}}>
                     <Option value='User'>User</Option>
                     <Option value='Administrator'>Administrator</Option>
                 </Select>
             )
         } else if (this.props.dataIndex === 'emailAddress') {
             return <AutoComplete dataSource={this.state.emailSource} onChange={this.emailHandleChange}
-                                 placeholder='Email'/>
+                                 placeholder='Email' style={{width: '100%'}}/>
         } else {
             return <Input/>
         }

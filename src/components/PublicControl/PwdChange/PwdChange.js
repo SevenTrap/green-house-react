@@ -9,6 +9,15 @@ class Index extends Component {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
             if (!err) {
+
+                if (values.newPassword !== values.password) {
+                    message.error('两次密码必须相同');
+                    return false;
+                }
+
+                delete values.newPassword;
+                console.log(values);
+
                 const token = window.sessionStorage.getItem('token');
                 const url = 'http://47.92.206.44:80/api/user';
                 const opts = {
@@ -58,10 +67,17 @@ class Index extends Component {
                     )}
                 </FormItem>
                 <FormItem>
-                    {getFieldDecorator('password', {
+                    {getFieldDecorator('newPassword', {
                         rules: [{ required: true, message: '请输入新密码' }],
                     })(
                         <Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="新密码" />
+                    )}
+                </FormItem>
+                <FormItem>
+                    {getFieldDecorator('password', {
+                        rules: [{ required: true, message: '请确认新密码' }],
+                    })(
+                        <Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="确认新密码" />
                     )}
                 </FormItem>
 

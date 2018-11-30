@@ -4,20 +4,16 @@ import {message} from "antd/lib/index";
 
 let deviceNameToPos = {};
 let devicePosToName = {};
-let deviceName = ['卷膜机1', '卷膜机2', '伺服1', '伺服2', '温湿度1', '温湿度2'];
+let deviceName = ['卷膜机1', '卷膜机2', '阀门', '风机'];
 deviceNameToPos["卷膜机1"] = 0;
 deviceNameToPos["卷膜机2"] = 1;
-deviceNameToPos["伺服1"] = 2;
-deviceNameToPos["伺服2"] = 3;
-deviceNameToPos["温湿度1"] = 4;
-deviceNameToPos["温湿度2"] = 5;
+deviceNameToPos["阀门"] = 2;
+deviceNameToPos["风机"] = 3;
 
 devicePosToName[0] = "卷膜机1";
 devicePosToName[1] = "卷膜机2";
-devicePosToName[2] = "伺服1";
-devicePosToName[3] = "伺服2";
-devicePosToName[4] = "温湿度1";
-devicePosToName[5] = "温湿度2";
+devicePosToName[2] = "阀门";
+devicePosToName[3] = "风机";
 
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -234,7 +230,6 @@ class EditableTable extends Component {
             greenHouseId: item.greenHouseId,
             greenHousePos: item.greenHousePos
         };
-
         const url = 'http://47.92.206.44:80/api/greenhousemap';
         const opts = {
             method: 'DELETE',
@@ -245,7 +240,6 @@ class EditableTable extends Component {
                 'authorization': 'Bearer ' + token
             }
         };
-
         fetch(url, opts)
             .then((response) => console.log(response.status))
             .then((res) => {
@@ -261,7 +255,6 @@ class EditableTable extends Component {
                     isLoading: false
                 })
             });
-
     };
 
     handleAdd = () => {
@@ -384,7 +377,6 @@ class EditableTable extends Component {
         });
         Promise.all([getGreenHouseMap, getGreenHouse, getDevice])
             .then(result => {
-
                 const deviceId = result[2].map(item => item.deviceId);
                 const greenHouseName = result[1].map(item => item.name);
                 let greenHouseIdToName = {};
@@ -407,7 +399,7 @@ class EditableTable extends Component {
                 })
             })
             .catch(error => {
-                message.error(error);
+                message.error('网络异常，请刷新页面');
                 this.setState({
                     isLoading: false
                 })

@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 
-import {Spin, message, Card, Icon, Row, Col, Switch, Radio, Slider, Button, Badge, Modal, Tag, Input} from 'antd';
+import {Spin, message, Card, Icon, Row, Col, Switch, Radio, Slider, Button, Badge, TimePicker, Tag, Input, Form} from 'antd';
+import moment from 'moment';
 import './index.css';
 
 let tempMarks = {
@@ -28,6 +29,8 @@ let humiMarks = {
         label: <strong>100%</strong>
     }
 };
+const FormItem = Form.Item;
+const format = 'HH:mm';
 
 class Index extends Component {
     constructor(props) {
@@ -42,6 +45,7 @@ class Index extends Component {
             isAction: [],
             tempModalDeviceId: '',
             tempModalNum: '',
+            clockValue: '',
             deviceStatus: {}
         }
     }
@@ -289,47 +293,47 @@ class Index extends Component {
                 }
                 else {
 
-                        let newAction = {};
-                        let newItem = [];
-                        newAction.deviceId = deviceIdItem;
-                        newAction.commandtype = '03';
-                        newAction.action = `${motor_1_act} ${motor_2_act} ${serve_1_act} ${value}`;
-                        newItem.push(newAction);
+                    let newAction = {};
+                    let newItem = [];
+                    newAction.deviceId = deviceIdItem;
+                    newAction.commandtype = '03';
+                    newAction.action = `${motor_1_act} ${motor_2_act} ${serve_1_act} ${value}`;
+                    newItem.push(newAction);
                     console.log(newItem);
-                        let urlDeviceAction = 'http://47.92.206.44:80/api/action/';
-                        let options = {
-                            method: 'POST',
-                            body: JSON.stringify(newItem),
-                            headers: {
-                                'Accept': 'application/json',
-                                'Content-Type': 'application/json',
-                                'authorization': 'Bearer ' + token
-                            }
-                        };
-                        fetch(urlDeviceAction, options)
-                            .then(response => console.log(response.status))
-                            .then(res => {
-                                deviceStatusItem.serve_2_act = value;
-                                console.log(deviceStatusItem);
-                                this.setState({
-                                    deviceStatus: {
-                                        ...deviceStatus,
-                                        [deviceIdItem]: deviceStatusItem
-                                    },
-                                    isAction: {
-                                        ...isAction,
-                                        controlStatus: false
-                                    }
-                                });
-                            })
-                            .catch(error => {
-                                this.setState({
-                                    isAction: {
-                                        ...isAction,
-                                        controlStatus: false
-                                    }
-                                });
-                            })
+                    let urlDeviceAction = 'http://47.92.206.44:80/api/action/';
+                    let options = {
+                        method: 'POST',
+                        body: JSON.stringify(newItem),
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                            'authorization': 'Bearer ' + token
+                        }
+                    };
+                    fetch(urlDeviceAction, options)
+                        .then(response => console.log(response.status))
+                        .then(res => {
+                            deviceStatusItem.serve_2_act = value;
+                            console.log(deviceStatusItem);
+                            this.setState({
+                                deviceStatus: {
+                                    ...deviceStatus,
+                                    [deviceIdItem]: deviceStatusItem
+                                },
+                                isAction: {
+                                    ...isAction,
+                                    controlStatus: false
+                                }
+                            });
+                        })
+                        .catch(error => {
+                            this.setState({
+                                isAction: {
+                                    ...isAction,
+                                    controlStatus: false
+                                }
+                            });
+                        })
                 }
 
             })
@@ -344,39 +348,183 @@ class Index extends Component {
             });
     };
 
-    handleChangeTempModal = (deviceIdItem, num, event) => {
-        const {isAction} = this.state;
-        this.setState({
-            tempModalDeviceId: deviceIdItem,
-            tempModalNum: num,
-            isAction: {
-                ...isAction,
-                tempModal: true
+    handleChangeTempModal = (tempModalDeviceId, tempModalNum, event) => {
+        event.preventDefault();
+
+        this.props.form.validateFields((err, values) => {
+            if (!err) {
+                let tempMax = Number(values[`tempMax${tempModalDeviceId}${tempModalNum}`]);
+                let tempMin = Number(values[`tempMin${tempModalDeviceId}${tempModalNum}`]);
+                const {isAction, deviceStatus} = this.state;
+
+                if (tempMin >= tempMax) {
+                    message.error('温度下限应当小于温度上限');
+                    return false;
+                }
+                tempMax = tempMax * 10;
+                tempMin = tempMin * 10;
+
+                this.setState({
+                    isAction: {
+                        ...isAction,
+                        tempModal: true
+                    }
+                });
+                //TODO
+                //每次执行操作之前，先获取当前deviceId最新状态，然后再执行操作
+                let deviceId = [];
+                deviceId.push(tempModalDeviceId);
+                const token = window.sessionStorage.getItem('token');
+                let urlDeviceStatus = 'http://47.92.206.44:80/api/devicestatus/';
+
+                const optionDeviceId = {
+                    method: 'POST',
+                    body: JSON.stringify(deviceId),
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'authorization': 'Bearer ' + token
+                    }
+                };
+
+                fetch(urlDeviceStatus, optionDeviceId)
+                    .then((response) => response.json())
+                    .then(res => {
+                        let deviceStatusItem = res[0];
+                        let motor_1_max = deviceStatusItem.motor_1_max;
+                        let motor_1_min = deviceStatusItem.motor_1_min;
+                        let motor_2_max = deviceStatusItem.motor_2_max;
+                        let motor_2_min = deviceStatusItem.motor_2_min;
+                        if (tempModalNum === 4) {
+                            let newAction = {};
+                            let newItem = [];
+                            newAction.deviceId = tempModalDeviceId;
+                            newAction.commandtype = '08';
+                            newAction.action = `1 ${tempMax} ${tempMin} ${motor_2_max} ${motor_2_min}`;
+
+                            newItem.push(newAction);
+                            console.log(newItem);
+                            let urlDeviceAction = 'http://47.92.206.44:80/api/action/';
+                            let options = {
+                                method: 'POST',
+                                body: JSON.stringify(newItem),
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json',
+                                    'authorization': 'Bearer ' + token
+                                }
+                            };
+                            fetch(urlDeviceAction, options)
+                                .then(response2 => console.log(response2.status))
+                                .then(res2 => {
+                                    deviceStatusItem.motor_1_max = tempMax;
+                                    deviceStatusItem.motor_1_min = tempMin;
+                                    console.log(deviceStatusItem);
+                                    this.setState({
+                                        deviceStatus: {
+                                            ...deviceStatus,
+                                            [tempModalDeviceId]: deviceStatusItem
+                                        },
+                                        isAction: {
+                                            ...isAction,
+                                            tempModal: false
+                                        }
+                                    });
+                                })
+                                .catch(error => {
+                                    this.setState({
+                                        isAction: {
+                                            ...isAction,
+                                            tempModal: false
+                                        }
+                                    });
+                                })
+
+                        }
+                        else {
+
+                            let newAction = {};
+                            let newItem = [];
+                            newAction.deviceId = tempModalDeviceId;
+                            newAction.commandtype = '08';
+                            newAction.action = `1 ${motor_1_max} ${motor_1_min} ${tempMax} ${tempMin}`;
+                            newItem.push(newAction);
+                            console.log(newItem);
+                            let urlDeviceAction = 'http://47.92.206.44:80/api/action/';
+                            let options = {
+                                method: 'POST',
+                                body: JSON.stringify(newItem),
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json',
+                                    'authorization': 'Bearer ' + token
+                                }
+                            };
+                            fetch(urlDeviceAction, options)
+                                .then(response => console.log(response.status))
+                                .then(res => {
+                                    deviceStatusItem.motor_2_max = tempMax;
+                                    deviceStatusItem.motor_2_min = tempMin;
+                                    console.log(deviceStatusItem);
+                                    this.setState({
+                                        deviceStatus: {
+                                            ...deviceStatus,
+                                            [tempModalDeviceId]: deviceStatusItem
+                                        },
+                                        isAction: {
+                                            ...isAction,
+                                            tempModal: false
+                                        }
+                                    });
+                                })
+                                .catch(error => {
+                                    this.setState({
+                                        isAction: {
+                                            ...isAction,
+                                            tempModal: false
+                                        }
+                                    });
+                                })
+                        }
+
+                    })
+                    .catch(error => {
+                        message.error('网络错误，请刷新网页');
+                        this.setState({
+                            isAction: {
+                                ...isAction,
+                                controlStatus: false
+                            }
+                        });
+                    });
+
+                //TODO
+                //每次执行操作之前，先获取当前deviceId最新状态，然后再执行操作
+                //也可以不执行获取数据操作，因为此状态不可变
+                this.setState({
+                    isAction: {
+                        ...isAction,
+                        tempModal: false
+                    }
+                })
+
+
             }
-        })
+        });
     };
 
-    handleChangeTempModalOk = (tempMax, tempMin) => {
-        const {isAction, deviceStatus, tempModalNum, tempModalDeviceId} = this.state;
-        console.log(tempMax, tempMin, tempModalDeviceId, tempModalNum);
-
-        if (tempMin >= tempMax) {
-            message.error('温度下限应当小于温度上限');
-            return false;
-        }
-        tempMax = tempMax * 10;
-        tempMin = tempMin * 10;
-
+    handleMotorRange = (deviceIdItem, num, value) => {
+        const {isAction, deviceStatus} = this.state;
         this.setState({
             isAction: {
                 ...isAction,
-                tempModal: true
+                controlStatus: true
             }
         });
         //TODO
         //每次执行操作之前，先获取当前deviceId最新状态，然后再执行操作
         let deviceId = [];
-        deviceId.push(tempModalDeviceId);
+        deviceId.push(deviceIdItem);
         const token = window.sessionStorage.getItem('token');
         let urlDeviceStatus = 'http://47.92.206.44:80/api/devicestatus/';
 
@@ -394,16 +542,14 @@ class Index extends Component {
             .then((response) => response.json())
             .then(res => {
                 let deviceStatusItem = res[0];
-                let motor_1_max = deviceStatusItem.motor_1_max;
-                let motor_1_min = deviceStatusItem.motor_1_min;
-                let motor_2_max = deviceStatusItem.motor_2_max;
-                let motor_2_min = deviceStatusItem.motor_2_min;
-                if (tempModalNum === 4) {
+                let motor_1_range = deviceStatusItem.motor_1_range;
+                let motor_2_range = deviceStatusItem.motor_2_range;
+                if (num === 0) {
                     let newAction = {};
                     let newItem = [];
-                    newAction.deviceId = tempModalDeviceId;
-                    newAction.commandtype = '08';
-                    newAction.action = `1 ${tempMax} ${tempMin} ${motor_2_max} ${motor_2_min}`;
+                    newAction.deviceId = deviceIdItem;
+                    newAction.commandtype = '13';
+                    newAction.action = `1 ${value} ${motor_2_range}`;
 
                     newItem.push(newAction);
                     console.log(newItem);
@@ -420,37 +566,38 @@ class Index extends Component {
                     fetch(urlDeviceAction, options)
                         .then(response2 => console.log(response2.status))
                         .then(res2 => {
-                            deviceStatusItem.motor_1_max = tempMax;
-                            deviceStatusItem.motor_1_min = tempMin;
-                            console.log(deviceStatusItem);
+                            deviceStatusItem.motor_1_range = value;
                             this.setState({
                                 deviceStatus: {
                                     ...deviceStatus,
-                                    [tempModalDeviceId]: deviceStatusItem
+                                    [deviceIdItem]: deviceStatusItem
                                 },
                                 isAction: {
                                     ...isAction,
-                                    tempModal: false
+                                    controlStatus: false
                                 }
                             });
                         })
                         .catch(error => {
                             this.setState({
+                                deviceStatus: {
+                                    ...deviceStatus,
+                                    [deviceIdItem]: deviceStatusItem
+                                },
                                 isAction: {
                                     ...isAction,
-                                    tempModal: false
+                                    controlStatus: false
                                 }
                             });
                         })
 
                 }
                 else {
-
                     let newAction = {};
                     let newItem = [];
-                    newAction.deviceId = tempModalDeviceId;
-                    newAction.commandtype = '08';
-                    newAction.action = `1 ${motor_1_max} ${motor_1_min} ${tempMax} ${tempMin}`;
+                    newAction.deviceId = deviceIdItem;
+                    newAction.commandtype = '13';
+                    newAction.action = `1 ${motor_1_range} ${value}`;
                     newItem.push(newAction);
                     console.log(newItem);
                     let urlDeviceAction = 'http://47.92.206.44:80/api/action/';
@@ -466,30 +613,31 @@ class Index extends Component {
                     fetch(urlDeviceAction, options)
                         .then(response => console.log(response.status))
                         .then(res => {
-                            deviceStatusItem.motor_2_max = tempMax;
-                            deviceStatusItem.motor_2_min = tempMin;
-                            console.log(deviceStatusItem);
+                            deviceStatusItem.motor_2_range = value;
                             this.setState({
                                 deviceStatus: {
                                     ...deviceStatus,
-                                    [tempModalDeviceId]: deviceStatusItem
+                                    [deviceIdItem]: deviceStatusItem
                                 },
                                 isAction: {
                                     ...isAction,
-                                    tempModal: false
+                                    controlStatus: false
                                 }
                             });
                         })
                         .catch(error => {
                             this.setState({
+                                deviceStatus: {
+                                    ...deviceStatus,
+                                    [deviceIdItem]: deviceStatusItem
+                                },
                                 isAction: {
                                     ...isAction,
-                                    tempModal: false
+                                    controlStatus: false
                                 }
                             });
                         })
                 }
-
             })
             .catch(error => {
                 message.error('网络错误，请刷新网页');
@@ -500,25 +648,125 @@ class Index extends Component {
                     }
                 });
             });
-
-        //TODO
-        //每次执行操作之前，先获取当前deviceId最新状态，然后再执行操作
-        //也可以不执行获取数据操作，因为此状态不可变
-        this.setState({
-            isAction: {
-                ...isAction,
-                tempModal: false
-            }
-        })
     };
 
-    handleChangeTempModalCancel = () => {
-        const {isAction} = this.state;
+    handleTimeOut = (deviceIdItem, value) => {
+        const {isAction, deviceStatus} = this.state;
         this.setState({
             isAction: {
                 ...isAction,
-                tempModal: false
+                controlStatus: true
             }
+        });
+        const deviceStatusItem = deviceStatus[`${deviceIdItem}`];
+        const token = window.sessionStorage.getItem('token');
+        const urlAction = 'http://47.92.206.44:80/api/action/';
+        let newAction = {};
+        let newItem = [];
+        newAction.deviceId = deviceIdItem;
+        newAction.commandtype = '09';
+        newAction.action = `1 ${value}`;
+        newItem.push(newAction);
+        console.log(newItem);
+        let options = {
+            method: 'POST',
+            body: JSON.stringify(newItem),
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'authorization': 'Bearer ' + token
+            }
+        };
+        fetch(urlAction, options)
+            .then(response => console.log(response.status))
+            .then(res => {
+                deviceStatusItem.timeout = value;
+                this.setState({
+                    deviceStatus: {
+                        ...deviceStatus,
+                        [deviceIdItem]: deviceStatusItem
+                    },
+                    isAction: {
+                        ...isAction,
+                        controlStatus: false
+                    }
+                });
+            })
+            .catch(error => {
+                message.error('网络异常，请重新提交');
+                this.setState({
+                    isAction: {
+                        ...isAction,
+                        controlStatus: false
+                    }
+                });
+            })
+
+    };
+
+    handleClock = (deviceIdItem) => {
+        const {isAction, deviceStatus, clockValue} = this.state;
+        if (!clockValue) {
+            message.warning('请选择时间');
+            return false;
+        }
+        let value = clockValue;
+        this.setState({
+            isAction: {
+                ...isAction,
+                controlStatus: true
+            }
+        });
+        const deviceStatusItem = deviceStatus[`${deviceIdItem}`];
+        const token = window.sessionStorage.getItem('token');
+        const urlAction = 'http://47.92.206.44:80/api/action/';
+        let newAction = {};
+        let newItem = [];
+        newAction.deviceId = deviceIdItem;
+        newAction.commandtype = '10';
+        newAction.action = `1 ${value} 1`;
+        newItem.push(newAction);
+        console.log(newItem);
+        let options = {
+            method: 'POST',
+            body: JSON.stringify(newItem),
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'authorization': 'Bearer ' + token
+            }
+        };
+        fetch(urlAction, options)
+            .then(response => console.log(response.status))
+            .then(res => {
+                deviceStatusItem.clock = value;
+                this.setState({
+                    deviceStatus: {
+                        ...deviceStatus,
+                        [deviceIdItem]: deviceStatusItem
+                    },
+                    isAction: {
+                        ...isAction,
+                        controlStatus: false
+                    }
+                });
+            })
+            .catch(error => {
+                message.error('网络异常，请重新提交');
+                this.setState({
+                    isAction: {
+                        ...isAction,
+                        controlStatus: false
+                    }
+                });
+            })
+
+    };
+
+    handleClockValue = (time, timeString) => {
+        let timeValue = timeString.replace(':', '');
+        this.setState({
+            clockValue: timeValue
         })
     };
 
@@ -526,7 +774,6 @@ class Index extends Component {
         this.setState({
             isLoading: true
         });
-        const that = this;
         const {greenHouseId} = this.state;
         const token = window.sessionStorage.getItem('token');
 
@@ -561,7 +808,7 @@ class Index extends Component {
                 isAction['controlStatus'] = false;
                 isAction['tempModal'] = false;
                 deviceId = Array.from(new Set(deviceId));
-                const urlDeviceStatus = 'http://47.92.206.44:80/api/devicestatus/';
+                const urlDeviceStatus = 'http://47.92.206.44:80/api/devicestatus';
                 const optionDeviceId = {
                     method: 'POST',
                     body: JSON.stringify(deviceId),
@@ -586,7 +833,7 @@ class Index extends Component {
                         console.log(deviceId);
                         console.log(deviceIdStatus);
 
-                        that.setState({
+                        this.setState({
                             greenHouseMaps: res,
                             deviceId: deviceId,
                             deviceStatus: deviceIdStatus,
@@ -617,6 +864,7 @@ class Index extends Component {
     }
 
     render() {
+        const {getFieldDecorator} = this.props.form;
         const {errorInfo, isLoading, greenHouseMaps, deviceId, deviceStatus, isAction} = this.state;
 
         if (errorInfo) {
@@ -641,19 +889,28 @@ class Index extends Component {
                     let greenHousePos2 = pos2.map(item => item.greenHousePos);
                     let greenHousePos3 = pos3.map(item => item.greenHousePos);
 
-                    let temp1 = (deviceStatus[`${deviceIdItem}`].temp1) / 10;
-                    let temp2 = (deviceStatus[`${deviceIdItem}`].temp2) / 10;
-                    let humi1 = (deviceStatus[`${deviceIdItem}`].hum1) / 10;
-                    let humi2 = (deviceStatus[`${deviceIdItem}`].hum2) / 10;
+                    let temp1 = parseInt((deviceStatus[`${deviceIdItem}`].temp1) / 10);
+                    let temp2 = parseInt((deviceStatus[`${deviceIdItem}`].temp2) / 10);
+                    let humi1 = parseInt((deviceStatus[`${deviceIdItem}`].hum1) / 10);
+                    let humi2 = parseInt((deviceStatus[`${deviceIdItem}`].hum2) / 10);
                     let motor_1_act = deviceStatus[`${deviceIdItem}`].motor_1_act;
                     let motor_2_act = deviceStatus[`${deviceIdItem}`].motor_2_act;
                     let serve_1_act = deviceStatus[`${deviceIdItem}`].serve_1_act;
                     let serve_2_act = deviceStatus[`${deviceIdItem}`].serve_2_act;
-                    let motor_1_max = (deviceStatus[`${deviceIdItem}`].motor_1_max) / 10;
-                    let motor_1_min = (deviceStatus[`${deviceIdItem}`].motor_1_min) / 10;
-                    let motor_2_max = (deviceStatus[`${deviceIdItem}`].motor_2_max) / 10;
-                    let motor_2_min = (deviceStatus[`${deviceIdItem}`].motor_2_min) / 10;
+                    let motor_1_max = parseInt((deviceStatus[`${deviceIdItem}`].motor_1_max) / 10);
+                    let motor_1_min = parseInt((deviceStatus[`${deviceIdItem}`].motor_1_min) / 10);
+                    let motor_2_max = parseInt((deviceStatus[`${deviceIdItem}`].motor_2_max) / 10);
+                    let motor_2_min = parseInt((deviceStatus[`${deviceIdItem}`].motor_2_min) / 10);
 
+                    let timeOut = deviceStatus[`${deviceIdItem}`].timeout;
+                    let clock = deviceStatus[`${deviceIdItem}`].clock;
+                    let motor_1_range = deviceStatus[`${deviceIdItem}`].motor_1_range;
+                    let motor_2_range = deviceStatus[`${deviceIdItem}`].motor_2_range;
+                    let rain = deviceStatus[`${deviceIdItem}`].rain;
+                    let rain_num = deviceStatus[`${deviceIdItem}`].rain_num;
+
+                    console.log(clock);
+                    clock = `${clock[0]}${clock[1]}:${clock[2]}${clock[3]}`
                     return (
                         <Card
                             key={deviceIdIndex}
@@ -663,27 +920,57 @@ class Index extends Component {
                                 marginBottom: '10px'
                             }}
                             extra={
-                                <div>
+                                <div style={{width: '700px'}}>
+                                    {rain_num ?
+                                        <p style={{float: 'left'}}>降雨量（雨量ID：{rain_num}）: <em
+                                            style={{color: 'red'}}>{rain} </em>mm</p>
+                                        : null
+                                    }
                                     <Icon type='setting'/>&nbsp;
                                     {deviceStatus[deviceIdItem].is_online === '0' ? '掉线' : '在线'}
                                 </div>
                             }
                         >
-                            <ChangeTempModal
-                                title={'温度设置'}
-                                onOk={this.handleChangeTempModalOk}
-                                onCancel={this.handleChangeTempModalCancel}
-                                visible={isAction.tempModal}
-                                deviceIdItem={deviceIdItem}
-                            />
                             <Spin spinning={isAction.controlStatus}>
+                                <Row gutter={24}>
+                                    <Col span={12}>
+                                        <Card>
+                                            <Col span={12}>
+                                                {`超时参数：${timeOut} min`}
+                                            </Col>
+                                            <Col span={12}>
+                                                <Input.Search onSearch={this.handleTimeOut.bind(this, deviceIdItem)} placeholder='请出入正整数' enterButton="提交"/>
+                                            </Col>
+                                        </Card>
+                                    </Col>
+                                    <Col span={12}>
+                                        <Card>
+                                            <Col span={12}>
+                                                {`闹钟定时：${clock}`}
+                                            </Col>
+                                            <Col span={12}>
+                                                <TimePicker
+                                                    placeholder={"请选择时间"}
+                                                    format={format}
+                                                    onChange={this.handleClockValue}
+                                                />
+                                                <Button onClick={this.handleClock.bind(this, deviceIdItem)} type='primary'>
+                                                    提交
+                                                </Button>
+                                            </Col>
+                                        </Card>
+                                    </Col>
+                                </Row>
                                 <Row gutter={24}>
                                     {greenHousePos0[0] ?
                                         <Col span={12}>
-                                            <Card>
-                                                <Col span={12}>
-                                                    <strong>卷膜机1 | {greenHousePos0[0]}</strong>
-                                                </Col>
+                                            <Card
+                                                title={`卷膜机1 | ${greenHousePos0[0]}`}
+                                                extra={
+                                                    <p>行程时间: <strong
+                                                        style={{color: 'green'}}>{`${motor_1_range}`}</strong> 秒</p>
+                                                }
+                                            >
                                                 <Col span={12}>
                                                     <Radio.Group name={deviceIdItem} value={motor_1_act}
                                                                  onChange={this.handleMotorControl.bind(this, deviceIdItem, 0)}>
@@ -692,16 +979,23 @@ class Index extends Component {
                                                         <Radio.Button value='1'>下降</Radio.Button>
                                                     </Radio.Group>
                                                 </Col>
+                                                <Col span={12}>
+                                                    <Input.Search placeholder='请输入行程时间' enterButton="提交"
+                                                                  onSearch={this.handleMotorRange.bind(this, deviceIdItem, 0)}/>
+                                                </Col>
                                             </Card>
                                         </Col>
                                         : null
                                     }
                                     {greenHousePos1[0] ?
                                         <Col span={12}>
-                                            <Card>
-                                                <Col span={12}>
-                                                    <strong>卷膜机2 | {greenHousePos1[0]}</strong>
-                                                </Col>
+                                            <Card
+                                                title={`卷膜机2 | ${greenHousePos1[0]}`}
+                                                extra={
+                                                    <p>行程时间: <strong
+                                                        style={{color: 'green'}}>{`${motor_2_range}`}</strong> 秒</p>
+                                                }
+                                            >
                                                 <Col span={12}>
                                                     <Radio.Group name={deviceIdItem} value={motor_2_act}
                                                                  onChange={this.handleMotorControl.bind(this, deviceIdItem, 1)}>
@@ -709,6 +1003,10 @@ class Index extends Component {
                                                         <Radio.Button value='2'>停止</Radio.Button>
                                                         <Radio.Button value='1'>下降</Radio.Button>
                                                     </Radio.Group>
+                                                </Col>
+                                                <Col span={12}>
+                                                    <Input.Search placeholder='请输入行程时间' enterButton="提交"
+                                                                  onSearch={this.handleMotorRange.bind(this, deviceIdItem, 1)}/>
                                                 </Col>
                                             </Card>
                                         </Col>
@@ -718,38 +1016,50 @@ class Index extends Component {
                                 <Row gutter={24}>
                                     {greenHousePos0[0] ?
                                         <Col span={12}>
-                                            <Card>
-                                                <Col span={5}>
-                                                    <strong>温湿度1:</strong>
-                                                </Col>
+                                            <Card
+                                                title='温湿度1'
+                                                extra={
+                                                    <div>
+                                                        <Badge count={motor_1_max}>
+                                                            <Tag color='red'>温度上限</Tag>
+                                                        </Badge>
+                                                        &nbsp;&nbsp;&nbsp;&nbsp;
+                                                        <Badge count={motor_1_min}>
+                                                            <Tag color='green'>温度下限</Tag>
+                                                        </Badge>
+                                                    </div>
+                                                }
+                                            >
                                                 <Col span={12}>
                                                     实时温度：<Slider style={{width: '100%'}} min={0} max={60}
                                                                  marks={tempMarks} step={1} value={temp1}/>
                                                     实时湿度：<Slider style={{width: '100%'}} min={0} max={100}
                                                                  marks={humiMarks} step={1} value={humi1}/>
                                                 </Col>
-                                                <Col span={7} className="changTemp">
-                                                    <div className="tempControlBox">
-                                                        <div>
-                                                            <Badge count={motor_1_max}>
-                                                                <Tag color='red'>温度上限</Tag>
-                                                            </Badge>
-                                                        </div>
-                                                        <br/>
-                                                        <div>
-                                                            <Badge count={motor_1_min}>
-                                                                <Tag color='green'>温度下限</Tag>
-                                                            </Badge>
-                                                        </div>
-                                                        <br/>
-                                                        <div>
-                                                            <Button type='primary'
-                                                                    onClick={this.handleChangeTempModal.bind(this, deviceIdItem, 4)}>
-                                                                修改阈值
+                                                <Col span={12} className="changTemp">
+                                                    <Form
+                                                        onSubmit={this.handleChangeTempModal.bind(this, deviceIdItem, 4)}
+                                                        className="login-form">
+                                                        <FormItem>
+                                                            {getFieldDecorator(`tempMax${deviceIdItem}4`, {
+                                                                rules: [{required: false}],
+                                                            })(
+                                                                <Input addonBefore='温度上限' placeholder="0～60"/>
+                                                            )}
+                                                        </FormItem>
+                                                        <FormItem>
+                                                            {getFieldDecorator(`tempMin${deviceIdItem}4`, {
+                                                                rules: [{required: false}],
+                                                            })(
+                                                                <Input addonBefore='温度下限' placeholder="0～60"/>
+                                                            )}
+                                                        </FormItem>
+                                                        <FormItem style={{textAlign: 'center'}}>
+                                                            <Button type="primary" htmlType="submit">
+                                                                提交阈值
                                                             </Button>
-                                                        </div>
-                                                    </div>
-
+                                                        </FormItem>
+                                                    </Form>
                                                 </Col>
                                             </Card>
                                         </Col>
@@ -757,37 +1067,51 @@ class Index extends Component {
                                     }
                                     {greenHousePos1[0] ?
                                         <Col span={12}>
-                                            <Card>
-                                                <Col span={5}>
-                                                    <strong>温湿度2:</strong>
-                                                </Col>
+                                            <Card
+                                                title='温湿度2'
+                                                extra={
+                                                    <div>
+                                                        <Badge count={motor_2_max}>
+                                                            <Tag color='red'>温度上限</Tag>
+                                                        </Badge>
+                                                        &nbsp;&nbsp;&nbsp;&nbsp;
+                                                        <Badge count={motor_2_min}>
+                                                            <Tag color='green'>温度下限</Tag>
+                                                        </Badge>
+                                                    </div>
+                                                }
+                                            >
                                                 <Col span={12}>
                                                     实时温度：<Slider style={{width: '100%'}} min={0} max={60}
                                                                  marks={tempMarks} step={1} value={temp2}/>
                                                     实时湿度：<Slider style={{width: '100%'}} min={0} max={100}
                                                                  marks={humiMarks} step={1} value={humi2}/>
                                                 </Col>
-                                                <Col span={7} className="changTemp">
-                                                    <div className="tempControlBox">
-                                                        <div>
-                                                            <Badge count={motor_2_max}>
-                                                                <Tag color='red'>温度上限</Tag>
-                                                            </Badge>
-                                                        </div>
-                                                        <br/>
-                                                        <div>
-                                                            <Badge count={motor_2_min}>
-                                                                <Tag color='green'>温度下限</Tag>
-                                                            </Badge>
-                                                        </div>
-                                                        <br/>
-                                                        <div>
-                                                            <Button type='primary'
-                                                                    onClick={this.handleChangeTempModal.bind(this, deviceIdItem, 5)}>
-                                                                修改阈值
+                                                <Col span={12} className="changTemp">
+                                                    <Form
+                                                        onSubmit={this.handleChangeTempModal.bind(this, deviceIdItem, 5)}
+                                                        className="login-form">
+                                                        <FormItem>
+                                                            {getFieldDecorator(`tempMax${deviceIdItem}5`, {
+                                                                rules: [{required: false}],
+                                                            })(
+                                                                <Input addonBefore='温度上限' placeholder="0～60"/>
+                                                            )}
+                                                        </FormItem>
+                                                        <FormItem>
+                                                            {getFieldDecorator(`tempMin${deviceIdItem}5`, {
+                                                                rules: [{required: false}],
+                                                            })(
+                                                                <Input addonBefore='温度下限' placeholder="0～60"/>
+                                                            )}
+                                                        </FormItem>
+                                                        <FormItem style={{textAlign: 'center'}}>
+                                                            <Button type="primary" htmlType="submit"
+                                                                    className="login-form-button">
+                                                                提交阈值
                                                             </Button>
-                                                        </div>
-                                                    </div>
+                                                        </FormItem>
+                                                    </Form>
                                                 </Col>
                                             </Card>
                                         </Col>
@@ -837,85 +1161,6 @@ class Index extends Component {
     }
 }
 
-class ChangeTempModal extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            tempMax: '',
-            tempMin: '',
-        }
-    }
+const WrappedNormalLoginForm = Form.create()(Index);
 
-    handleOk = () => {
-        const {tempMax, tempMin} = this.state;
-        this.props.onOk(tempMax, tempMin);
-    };
-
-    handleCancel = () => {
-        this.props.onCancel();
-    };
-    handleTempMax = (e) => {
-        let value = Number(e.target.value);
-        if (value > 60) {
-            value = 60;
-        }
-        if (value < 0) {
-            value = 0;
-        }
-        this.setState({
-            tempMax: value
-        })
-    };
-    handleTempMin = (e) => {
-        let value = Number(e.target.value);
-        if (value > 60) {
-            value = 60;
-        }
-        if (value < 0) {
-            value = 0;
-        }
-        this.setState({
-            tempMin: value
-        })
-    };
-
-    render() {
-        const {visible} = this.props;
-
-        const {tempMax, tempMin} = this.state;
-        return (
-            <Modal
-                title={this.props.title}
-                visible={visible}
-                okText='提交'
-                onOk={this.handleOk}
-                cancelText='取消'
-                width='400px'
-                onCancel={this.handleCancel}
-            >
-                <Input
-                    addonBefore='温度上限：'
-                    addonAfter='摄氏度'
-                    size='large'
-                    type='number'
-                    value={tempMax}
-                    placeholder='0～60'
-                    onChange={this.handleTempMax}
-                />
-                <br/>
-                <br/>
-                <Input
-                    addonBefore='温度下限：'
-                    addonAfter='摄氏度'
-                    size='large'
-                    type='number'
-                    value={tempMin}
-                    placeholder='0～60'
-                    onChange={this.handleTempMin}
-                />
-            </Modal>
-        )
-    }
-}
-
-export default Index;
+export default WrappedNormalLoginForm;

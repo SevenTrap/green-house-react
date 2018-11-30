@@ -135,9 +135,6 @@ class EditableTable extends Component {
             }
         ];
 
-        this.fetchGetData = this.fetchGetData.bind(this);
-        this.fetchGetUserData = this.fetchGetUserData.bind(this);
-
         this.state = {
             data: [],
             userNames: [],
@@ -180,10 +177,14 @@ class EditableTable extends Component {
     }
 
     handleDelete = (key) => {
+        const {data, editingKey} = this.state;
+        if (editingKey) {
+            message.warning('存在正在编辑项目');
+            return false;
+        }
         this.setState({
             isLoading: true
         });
-        const {data} = this.state;
         const index = data.findIndex(item => key === item.key);
         const item = data[index];
         const deleteKey = item.deviceId;
@@ -199,7 +200,7 @@ class EditableTable extends Component {
             }
         };
         fetch(url, opts)
-            .then((response) => console.log(response.status))
+            .then(response => console.log(response.status))
             .then((res) => {
                 message.success('删除成功');
                 this.setState({
@@ -208,7 +209,11 @@ class EditableTable extends Component {
                 })
             })
             .catch((error) => {
-                message.error('删除失败');
+                if (error === 401) {
+                    message.warning('删除失败，您的登录信息已失效，请退出后重新登录', 5);
+                } else if (error === 500) {
+                    message.warning('服务器崩溃', 5);
+                }
                 this.setState({
                     isLoading: false
                 })
@@ -292,13 +297,14 @@ class EditableTable extends Component {
         })
     };
 
-    fetchGetData = () => {
+    componentDidMount() {
         this.setState({
             isLoading: true
         });
         const token = window.sessionStorage.getItem('token');
-        const url = 'http://47.92.206.44:80/api/device';
-        const opts = {
+        const urlGetData = 'http://47.92.206.44:80/api/device';
+        const urlGetUser = 'http://47.92.206.44:80/api/user';
+        const options = {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -307,49 +313,43 @@ class EditableTable extends Component {
             }
         };
 
-        fetch(url, opts)
-            .then((response) => response.json())
-            .then((res) => {
-                res.map((item, index) => item.key = index);
+        const timeOutPromise = new Promise((resolve, reject) => {
+            setTimeout(function () {
+                reject('TimeOut!')
+            }, 10000)
+        });
+        const fetchGetData = new Promise((resolve, reject) => {
+            fetch(urlGetData, options)
+                .then(response => response.json())
+                .then(responseText => resolve(responseText))
+                .catch(error => reject(error))
+        });
+        const fetchGetUserData = new Promise((resolve, reject) => {
+            fetch(urlGetUser, options)
+                .then(response => response.json())
+                .then(responseText => resolve(responseText))
+                .catch(error => reject(error))
+        });
+        const getData = Promise.all([fetchGetData, fetchGetUserData])
+            .then(result => Promise.resolve(result))
+            .catch(error => Promise.reject(error));
+        Promise.race([timeOutPromise, getData])
+            .then(result => {
+                result[0].map((item, index)=> item.key = index);
+                const userData = result[1].map(item => item.username);
                 this.setState({
-                    isLoading: false,
-                    count: res.length,
-                    data: res
+                    data: result[0],
+                    count: result[0].length,
+                    userNames: userData,
+                    isLoading: false
                 })
             })
-            .catch((err) => {
-                message.error('请求数据失败')
-            })
-    };
-
-    fetchGetUserData = () => {
-        const token = window.sessionStorage.getItem('token');
-        const url = 'http://47.92.206.44:80/api/user';
-        const opts = {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'authorization': 'Bearer ' + token
-            }
-        };
-
-        fetch(url, opts)
-            .then((response) => response.json())
-            .then((res) => {
-                const userData = res.map(item => item.username);
+            .catch(error => {
+                message.error('网络异常，请重新刷新页面');
                 this.setState({
-                    userNames: userData
+                    isLoading: false
                 })
-            })
-            .catch((err) => {
-                message.error('请求数据失败')
-            })
-    };
-
-    componentDidMount() {
-        this.fetchGetData();
-        this.fetchGetUserData();
+            });
     }
 
     render() {
