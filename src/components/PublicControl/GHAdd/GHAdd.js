@@ -37,7 +37,7 @@ class EditableCell extends Component {
                                     {form.getFieldDecorator(dataIndex, {
                                         rules: [{
                                             required: isRequired,
-                                            message: `${title}不可为空!!!`,
+                                            message: `${title}不可为空`,
                                         }],
                                         initialValue: record[dataIndex]
                                     })(this.getInput())}

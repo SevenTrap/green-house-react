@@ -1,12 +1,12 @@
 import React, {Component} from 'react';
 import {BrowserRouter, Route, Switch} from 'react-router-dom';
+import './App.css';
 
 /*管理员系统*/
 import PrivateAdminRoute from './PrivateAdminRoute';
 import AdminLogin from './components/AdminControl/Login';
 import AdminUser from './components/AdminControl/UserControl';
 import AdminEquip from './components/AdminControl/EquipmentControl';
-
 
 /*用户系统*/
 import PrivatePublicRoute from './PrivatePublicRoute';
@@ -24,8 +24,7 @@ class App extends Component {
         return (
             <BrowserRouter>
                 <Switch>
-                    <Route exact path="/" component={Home}/>
-
+                    <Route exact path="/" component={AdminLogin}/>
                     <Route path="/admin/Login" component={AdminLogin}/>
                     <PrivateAdminRoute path="/admin/user" component={AdminUser}/>
                     <PrivateAdminRoute path="/admin/equip" component={AdminEquip}/>
@@ -41,7 +40,5 @@ class App extends Component {
         );
     }
 }
-
-const Home = () => <h1>Home</h1>;
 
 export default App;

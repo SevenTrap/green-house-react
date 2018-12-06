@@ -1,19 +1,13 @@
 import React, {Component} from 'react';
 import {Form, Icon, Input, Button, message, Radio} from 'antd';
 import {withRouter, Link} from 'react-router-dom';
-import './index.less';
-import TopLeft from './top-left.png';
+import TopLeft from '../../../top-left.png';
 
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
 
 class NormalLoginForm extends Component {
-    constructor(props) {
-        super(props);
-        this.handleSubmit = this.handleSubmit.bind(this);
-    }
-
-    handleSubmit(event) {
+    handleSubmit = (event) => {
         this.props.form.validateFields((err, values) => {
             if (!err) {
                 const opts = {
@@ -24,12 +18,19 @@ class NormalLoginForm extends Component {
                         'Content-Type': 'application/json'
                     }
                 };
-
                 fetch('http://47.92.206.44:80/api/login', opts)
-                    .then((response) => response.json())
-                    .then((responseText) => {
-                        if (responseText.role === 'User') {
-                            window.sessionStorage.setItem('token', responseText.token);
+                    .then(response => {
+                        if (response.status === 200) {
+                            return response.json()
+                        } else if (response.status === 401) {
+                            return response.status
+                        } else {
+                            return Promise.reject('网络异常，等重新登录')
+                        }
+                    })
+                    .then(res => {
+                        if (res.role === 'User') {
+                            window.sessionStorage.setItem('token', res.token);
                             window.sessionStorage.setItem('Username', values.Username);
                             window.sessionStorage.setItem('isLogin', true);
                             this.props.history.push('/public/GHControl');
@@ -37,19 +38,15 @@ class NormalLoginForm extends Component {
                             message.error('用户名或密码错误')
                         }
                     })
-                    .catch((error) => {
-                        console.log(error);
-                        message.error('用户名或密码错误')
+                    .catch(() => {
+                        message.error('网络异常，等重新登录')
                     });
             }
         });
         event.preventDefault()
-    }
-
+    };
     render() {
-
         const {getFieldDecorator} = this.props.form;
-
         return (
             <div className="login-page">
                 <header>
@@ -73,7 +70,7 @@ class NormalLoginForm extends Component {
                                 {getFieldDecorator('Username', {
                                     rules: [{
                                         required: true,
-                                        message: '请输入用户名!'
+                                        message: '请输入用户名'
                                     }],
                                 })(
                                     <Input prefix={<Icon type="user" style={{color: 'rgba(0, 0, 0, .25)'}}/>}
@@ -84,7 +81,7 @@ class NormalLoginForm extends Component {
                                 {getFieldDecorator('Password', {
                                     rules: [{
                                         required: true,
-                                        message: '请输入密码!'
+                                        message: '请输入密码'
                                     }],
 
                                 })(
@@ -101,7 +98,7 @@ class NormalLoginForm extends Component {
                     </div>
                 </div>
                 <footer>
-                    北京林业大学 &copy; 版权所有
+                    北京华雨奥博农业科技有限公司 &copy; 版权所有
                 </footer>
             </div>
         )

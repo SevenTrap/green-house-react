@@ -2,26 +2,19 @@ import React, {Component} from 'react';
 import {Avatar} from 'antd';
 import {withRouter} from 'react-router-dom';
 
-import './index.less';
-
 class Index extends Component {
     constructor(props) {
         super(props);
-
-        this.getLoginOut = this.getLoginOut.bind(this);
-
         this.state = {
             Username: window.sessionStorage.getItem('Username')
         }
     }
-
-    getLoginOut() {
+    getLoginOut = () => {
         window.sessionStorage.removeItem('Username');
         window.sessionStorage.removeItem('isLogin');
         window.sessionStorage.removeItem('token');
         this.props.history.push('/public/Login');
-    }
-
+    };
     render() {
         return (
             <header className="header">
@@ -35,7 +28,6 @@ class Index extends Component {
                             退出登录
                         </button>
                     </div>
-
                 </div>
             </header>
         )

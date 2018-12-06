@@ -3,7 +3,6 @@ import React, {Component} from 'react';
 import Header from '../Header/index';
 import Nav from '../Nav/index';
 import PwdChange from './PwdChange';
-import './index.css';
 
 class Index extends Component {
     render() {
@@ -12,7 +11,7 @@ class Index extends Component {
             <div>
                 <Header/>
                 <Nav/>
-                <div className='inner table'>
+                <div className='inner password'>
                     <PwdChange />
                 </div>
             </div>

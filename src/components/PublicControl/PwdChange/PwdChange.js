@@ -9,15 +9,11 @@ class Index extends Component {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
             if (!err) {
-
                 if (values.newPassword !== values.password) {
                     message.error('两次密码必须相同');
                     return false;
                 }
-
                 delete values.newPassword;
-                console.log(values);
-
                 const token = window.sessionStorage.getItem('token');
                 const url = 'http://47.92.206.44:80/api/user';
                 const opts = {
@@ -29,18 +25,12 @@ class Index extends Component {
                         'authorization': 'Bearer ' + token
                     }
                 };
-
                 fetch(url, opts)
-                    .then((response) => {
-                        console.log(response.status);
-                        if (response.status === 200) {
-                            return true;
-                        }
-                    })
-                    .then((res) => {
+                    .then((response) => console.log(response.status))
+                    .then(() => {
                         message.success('修改密码成功')
                     })
-                    .catch((err) => {
+                    .catch(() => {
                         message.error('修改密码失败')
                     });
             }
@@ -51,7 +41,7 @@ class Index extends Component {
         const { getFieldDecorator } = this.props.form;
 
         return (
-            <Form onSubmit={this.handleSubmit} className='login-form'>
+            <Form onSubmit={this.handleSubmit} className='login-form-password'>
                 <FormItem>
                     {getFieldDecorator('username', {
                         rules: [{ required: true, message: '请输入用户名' }],

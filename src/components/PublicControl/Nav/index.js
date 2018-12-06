@@ -2,8 +2,6 @@ import React, {Component} from 'react';
 import {Layout, Menu, Icon} from 'antd';
 import {Link} from 'react-router-dom';
 
-// import './index.css';
-
 class Index extends Component {
     constructor(props) {
         super(props);

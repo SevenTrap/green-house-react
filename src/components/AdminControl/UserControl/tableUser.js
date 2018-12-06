@@ -14,52 +14,22 @@ const EditableRow = ({form, index, ...props}) => (
 const EditableFormRow = Form.create()(EditableRow);
 
 class EditableCell extends Component {
-
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            emailSource: []
-        }
-    }
-
     //判断输入框的类型
     getInput = () => {
         if (this.props.dataIndex === 'role') {
             return (
-                <Select defaultValue='User' style={{width: '100%'}}>
-                    <Option value='User'>User</Option>
-                    <Option value='Administrator'>Administrator</Option>
+                <Select style={{width: '100%'}}>
+                    <Option value='User'>普通用户</Option>
+                    <Option value='Administrator'>管理员</Option>
                 </Select>
             )
-        } else if (this.props.dataIndex === 'emailAddress') {
-            return <AutoComplete dataSource={this.state.emailSource} onChange={this.emailHandleChange}
-                                 placeholder='Email' style={{width: '100%'}}/>
         } else {
             return <Input/>
         }
     };
 
-    emailHandleChange = (value) => {
-        this.setState({
-            emailSource: !value || value.indexOf('@') >= 0 ? [] : [
-                `${value}@qq.com`,
-                `${value}@163.com`,
-                `${value}@126.com`,
-                `${value}@139.com`
-            ]
-        })
-    };
-
     render() {
-        const {
-            editing,
-            dataIndex,
-            isRequired,
-            title,
-            record,
-            ...restProps
-        } = this.props;
+        const {editing, dataIndex, isRequired, title, record, ...restProps} = this.props;
         return (
             <EditableContext.Consumer>
                 {(form) => {
@@ -70,7 +40,7 @@ class EditableCell extends Component {
                                     {form.getFieldDecorator(dataIndex, {
                                         rules: [{
                                             required: isRequired,
-                                            message: `${title}不可为空!!!`,
+                                            message: `${title}不可为空`,
                                         }],
                                         initialValue: record[dataIndex]
                                     })(this.getInput())}
@@ -101,7 +71,7 @@ class EditableTable extends Component {
                 isRequired: false,
                 width: '15%'
             }, {
-                title: '角色',
+                title: '角色权限',
                 dataIndex: 'role',
                 editable: true,
                 isRequired: true,
@@ -175,14 +145,13 @@ class EditableTable extends Component {
             }
         ];
 
-        this.fetchGetUsers = this.fetchGetUsers.bind(this);
-
         this.state = {
             data: [],
             editingKey: '',
             isNew: false,
             count: '',
-            isLoading: false
+            isLoading: false,
+            userNames: []
         }
     }
 
@@ -196,7 +165,6 @@ class EditableTable extends Component {
         if (editingKey) {
             return false;
         }
-
         this.setState({
             editingKey: key
         })
@@ -225,15 +193,14 @@ class EditableTable extends Component {
         this.setState({
             isLoading: true
         });
-        const {data} = this.state;
+        const {data, userNames} = this.state;
         const index = data.findIndex(item => key === item.key);
-        const item = data[index];
-        const deleteKey = item.username;
+        const item = data[index].username;
         const token = window.sessionStorage.getItem('token');
-        const url = 'http://47.92.206.44:80/api/user/' + deleteKey;
+        const url = 'http://47.92.206.44:80/api/user/' + item;
         const opts = {
             method: 'DELETE',
-            body: JSON.stringify(deleteKey),
+            body: JSON.stringify(item),
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
@@ -241,15 +208,17 @@ class EditableTable extends Component {
             }
         };
         fetch(url, opts)
-            .then((response) => console.log(response.status))
-            .then((res) => {
-                message.success('删除成功');
+            .then(() => {
+                message.success('删除用户成功');
+                const userNameIndex = userNames.indexOf(item);
+                userNames.splice(userNameIndex, 1);
                 this.setState({
                     isLoading: false,
+                    userNames: userNames,
                     data: data.filter(item => item.key !== key)
                 })
             })
-            .catch((error) => {
+            .catch(() => {
                 message.error('删除失败');
                 this.setState({
                     isLoading: false
@@ -284,10 +253,7 @@ class EditableTable extends Component {
             if (error) {
                 return false;
             }
-            this.setState({
-                isLoading: true
-            });
-            const {data, isNew} = this.state;
+            const {data, isNew, userNames} = this.state;
             const index = data.findIndex(item => key === item.key);
             const item = data[index];
             const newItem = {...item, ...row};
@@ -299,6 +265,10 @@ class EditableTable extends Component {
                 emailAddress: newItem.emailAddress,
                 description: newItem.description
             };
+            if (userNames.indexOf(saveItem.username) > -1 && isNew) {
+                message.warning('此用户名已存在，请重新指定用户');
+                return false;
+            }
             const token = window.sessionStorage.getItem('token');
             const url = 'http://47.92.206.44:80/api/user/' + newItem.username;
             const opts = {
@@ -310,16 +280,22 @@ class EditableTable extends Component {
                     'authorization': 'Bearer ' + token
                 }
             };
-
+            this.setState({
+                isLoading: true
+            });
             fetch(url, opts)
                 .then((response) => console.log(response.status))
-                .then((res) => {
+                .then(() => {
                     message.success('添加成功');
                     data.splice(index, 1, newItem);
+                    if (isNew) {
+                        userNames.push(newItem.username);
+                    }
                     this.setState({
                         isLoading: false,
                         data: data,
                         isNew: false,
+                        userNames: userNames,
                         editingKey: ''
                     })
                 })
@@ -338,13 +314,13 @@ class EditableTable extends Component {
         })
     };
 
-    fetchGetUsers = () => {
+    componentDidMount() {
         this.setState({
             isLoading: true
         });
         const token = window.sessionStorage.getItem('token');
         const url = 'http://47.92.206.44:80/api/user';
-        const opts = {
+        const option = {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -352,26 +328,25 @@ class EditableTable extends Component {
                 'authorization': 'Bearer ' + token
             }
         };
-        fetch(url, opts)
-            .then((response) => response.json())
+        fetch(url, option)
+            .then(response => response.json())
             .then((res) => {
                 res.map((item, index) => item.key = index);
+                res.map(item => item.role = `${item.role === 'User' ? '普通用户' : '管理员'}`);
+                let userNames = res.map(item => item.username);
                 this.setState({
+                    userNames: userNames,
                     count: res.length,
                     isLoading: false,
                     data: res
                 })
             })
-            .catch((err) => {
-                message.error('请求数据失败');
+            .catch(() => {
+                message.error('网络异常，请重新刷新页面');
                 this.setState({
                     isLoading: false
                 })
             })
-    };
-
-    componentDidMount() {
-        this.fetchGetUsers()
     }
 
     render() {

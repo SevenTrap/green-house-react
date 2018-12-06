@@ -4,8 +4,6 @@ import Header from '../Header/index';
 import Nav from '../Nav/index';
 import GHBind from './GHBind';
 
-// import './index.css';
-
 class Index extends Component {
     render() {
         window.sessionStorage.setItem('PageControl', 'GHBind');

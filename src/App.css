@@ -1,4 +1,196 @@
-.base {
-    width: inherit;
-    height: inherit;
+* {
+  margin: 0;
+  padding: 0;
 }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+#root {
+  width: 100%;
+  height: 100%;
+}
+header.header {
+  height: 120px;
+}
+header.header .inner {
+  width: 980px;
+  margin: 0 auto;
+  position: relative;
+}
+header.header .header-title {
+  font-size: 32px;
+  line-height: 120px;
+  text-align: center;
+  color: #333333;
+}
+header.header .user-control {
+  position: absolute;
+  color: #333333;
+  right: 0;
+  bottom: 10px;
+}
+header.header .user-control .user-logo {
+  margin-right: 20px;
+}
+header.header .user-control button {
+  cursor: pointer;
+  outline: none;
+  background: transparent;
+  border: none;
+  height: 24px;
+  line-height: 24px;
+}
+header.header .user-control button:hover {
+  color: #d9534f;
+}
+.login-page {
+  background: url("login-background.png");
+  background-size: cover;
+  width: 100%;
+  height: 100%;
+  min-height: 650px;
+}
+.login-page header {
+  height: 160px;
+  line-height: 160px;
+  text-align: center;
+  font-size: 48px;
+  font-weight: bolder;
+  border-bottom: 1px solid #7a8086;
+}
+.login-page footer {
+  height: 40px;
+  line-height: 40px;
+  text-align: center;
+  font-size: 16px;
+}
+.login-main {
+  min-height: 700px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.login-main .login-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+}
+.login-main .login-container .login-logo {
+  z-index: 1;
+  background: url("login-logo.png");
+  background-size: cover;
+  width: 347px;
+  height: 300px;
+  margin-right: 20px;
+}
+.login-main .login-container .top-left {
+  z-index: 2;
+  position: absolute;
+  top: -30px;
+  left: -30px;
+}
+.login-main .login-container .top-left img {
+  width: 60px;
+  height: 60px;
+}
+.login-main .login-container .login-form {
+  z-index: 1;
+  width: 300px;
+  background: #d3dee4;
+  border-radius: 6px;
+  padding: 30px;
+}
+.login-main .login-container .login-form .user-check {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.login-main .login-container .login-form .login-form-forgot {
+  float: right;
+  padding-bottom: 20px;
+}
+.login-main .login-container .login-form .login-form-button {
+  display: block;
+  width: 100%;
+}
+.inner {
+  width: 1200px;
+  margin: 0 auto;
+}
+.table {
+  padding: 30px 0;
+}
+.add-row-button {
+  margin-left: 1090px;
+  margin-bottom: 16px;
+}
+.custom-filter-dropdown {
+  padding: 8px;
+  border-radius: 6px;
+  background: #ffffff;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
+}
+.custom-filter-dropdown input {
+  width: 130px;
+  margin-right: 8px;
+}
+.custom-filter-dropdown button {
+  margin-right: 8px;
+}
+.ant-table-pagination.ant-pagination {
+  text-align: center;
+  float: none;
+}
+.highlight {
+  color: #ff5500;
+}
+.nav-menu {
+  background: #eeeeee;
+}
+.nav-menu .inner ul {
+  background: #eeeeee;
+}
+@media screen and (max-width: 1440px) {
+  .login-page header {
+    height: 100px;
+    line-height: 100px;
+    font-size: 32px;
+  }
+  .login-main {
+    min-height: 500px;
+  }
+}
+.ant-row {
+  margin-bottom: 10px;
+}
+.ant-row:last-child {
+  margin-bottom: 0;
+}
+.changTemp {
+  padding-left: 30px!important;
+}
+.tempControlBox {
+  display: -webkit-flex;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+}
+.password {
+  margin: 0 auto;
+  text-align: center;
+}
+.password .login-form-password {
+  display: inline-block;
+  margin-top: 40px;
+  width: 250px;
+}
+/*# sourceMappingURL=App.css.map */

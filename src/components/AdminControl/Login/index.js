@@ -1,22 +1,14 @@
 import React, {Component} from 'react';
-import {Form, Icon, Input, Button, Radio} from 'antd';
+import {Form, Icon, Input, Button, Radio, message} from 'antd';
 import {withRouter, Link} from 'react-router-dom';
-import './index.less';
-import TopLeft from './top-left.png';
-import {message} from "antd/lib/index";
+import TopLeft from '../../../top-left.png';
 
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
 
 class NormalLoginForm extends Component {
-    constructor(props) {
-        super(props);
-
-        this.handleSubmit = this.handleSubmit.bind(this);
-
-    }
-
-    handleSubmit(event) {
+    handleSubmit = (event) => {
+        event.preventDefault();
         this.props.form.validateFields((err, values) => {
             if (!err) {
                 const opts = {
@@ -29,7 +21,15 @@ class NormalLoginForm extends Component {
                 };
 
                 fetch('http://47.92.206.44:80/api/login', opts)
-                    .then((response) => response.json())
+                    .then((response) => {
+                        if (response.status === 200) {
+                            return response.json()
+                        } else if (response.status === 401) {
+                            return response.status
+                        } else {
+                            return Promise.reject('网络异常，等重新登录')
+                        }
+                    })
                     .then((responseText) => {
                         if (responseText.role === 'Administrator') {
                             window.sessionStorage.setItem('token', responseText.token);
@@ -37,17 +37,15 @@ class NormalLoginForm extends Component {
                             window.sessionStorage.setItem('isLogin', true);
                             this.props.history.push('/admin/user');
                         } else {
-                            message.error('用户名或密码错误')
+                            message.error('用户名或密码错误');
                         }
                     })
-                    .catch((error) => {
-                        console.log(error);
-                        message.error('用户名或密码错误')
+                    .catch(() => {
+                        message.error('网络异常，请重新登录')
                     });
             }
-        });
-        event.preventDefault()
-    }
+        })
+    };
 
     render() {
 
@@ -74,21 +72,16 @@ class NormalLoginForm extends Component {
                             </div>
                             <FormItem>
                                 {getFieldDecorator('Username', {
-                                    rules: [{required: true, message: '请输入用户名!'}],
-
+                                    rules: [{required: true, message: '请输入管理员账户'}]
                                 })(
-                                    <Input prefix={<Icon type="user" style={{color: 'rgba(0, 0, 0, .25)'}}/>}
-                                           placeholder="用户名"/>
+                                    <Input prefix={<Icon type="user" style={{color: 'rgba(0, 0, 0, .25)'}}/>} placeholder="管理员账户"/>
                                 )}
                             </FormItem>
                             <FormItem>
                                 {getFieldDecorator('Password', {
-                                    rules: [{required: true, message: '请输入密码!'}],
-
+                                    rules: [{required: true, message: '请输入密码'}]
                                 })(
-                                    <Input prefix={<Icon type="lock" style={{color: 'rgba(0, 0, 0, .25)'}}/>}
-                                           type="password"
-                                           placeholder="密码"/>
+                                    <Input prefix={<Icon type="lock" style={{color: 'rgba(0, 0, 0, .25)'}}/>} type="password" placeholder="管理员密码"/>
                                 )}
                             </FormItem>
                             <a className="login-form-forgot" href="/">忘记密码 ？</a>
@@ -99,7 +92,7 @@ class NormalLoginForm extends Component {
                     </div>
                 </div>
                 <footer>
-                    北京林业大学 &copy; 版权所有
+                    北京华雨奥博农业科技有限公司 &copy; 版权所有
                 </footer>
             </div>
         )
