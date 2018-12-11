@@ -379,7 +379,6 @@ class EditableTable extends Component {
             .catch(error => Promise.reject(error));
         Promise.race([timeOutPromise, getData])
             .then(result => {
-                console.log(result);
                 result[0].map((item, index)=> item.key = index);
                 const userData = result[1].map(item => item.username);
                 let rainNamesToId = {};

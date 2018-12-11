@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Table, Input, Button, Popconfirm, Form, Select, Spin, message, Icon} from 'antd';
+import {Table, Input, Button, Popconfirm, Form, Select, Spin, AutoComplete, message, Icon} from 'antd';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -14,18 +14,34 @@ const EditableRow = ({form, index, ...props}) => (
 const EditableFormRow = Form.create()(EditableRow);
 
 class EditableCell extends Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            userNames: this.props.userNames
+        }
+    }
     //判断输入框的类型
     getInput = () => {
-        if (this.props.dataIndex === 'role') {
+        if (this.props.dataIndex === 'username') {
             return (
-                <Select style={{width: '100%'}}>
-                    <Option value='普通用户'>普通用户</Option>
-                    <Option value='管理员'>管理员</Option>
-                </Select>
+                <AutoComplete
+                    dataSource={this.state.userNames}
+                    style={{width: '100%'}}
+                    onSearch={this.handleUserNameSearch}
+                    placeholder='请选择用户'
+                />
             )
         } else {
             return <Input/>
         }
+    };
+    handleUserNameSearch = (value) => {
+        const {userNames} = this.props;
+        const newUserName = userNames.filter(item => (item.indexOf(value) > -1) ? item : null);
+        this.setState({
+            userNames: newUserName
+        })
     };
     render() {
         const {editing, dataIndex, isRequired, title, record, ...restProps} = this.props;
@@ -58,35 +74,35 @@ class EditableTable extends Component {
         super(props);
         this.columns = [
             {
-                title: '账号名称',
+                title: '雨量设备ID',
+                dataIndex: 'rainId',
+                editable: true,
+                isRequired: true,
+                width: '15%'
+            }, {
+                title: '雨量名称',
+                dataIndex: 'name',
+                editable: true,
+                isRequired: true,
+                width: '15%'
+            }, {
+                title: '安装位置',
+                dataIndex: 'location',
+                editable: true,
+                isRequired: true,
+                width: '15%'
+            }, {
+                title: '详情',
+                dataIndex: 'description',
+                editable: true,
+                isRequired: true,
+                width: '25%'
+            }, {
+                title: '归属用户',
                 dataIndex: 'username',
                 editable: true,
                 isRequired: true,
-                width: '15%'
-            }, {
-                title: '密码',
-                dataIndex: 'password',
-                editable: true,
-                isRequired: false,
-                width: '15%'
-            }, {
-                title: '账号权限',
-                dataIndex: 'role',
-                editable: true,
-                isRequired: true,
-                width: '15%'
-            }, {
-                title: '联系电话',
-                dataIndex: 'phone',
-                editable: true,
-                isRequired: true,
-                width: '15%'
-            }, {
-                title: 'Email邮箱',
-                dataIndex: 'emailAddress',
-                editable: true,
-                isRequired: false,
-                width: '25%',
+                width: '15%',
             }, {
                 title: '操作',
                 dataIndex: 'operation',
@@ -150,6 +166,7 @@ class EditableTable extends Component {
             isNew: false,
             count: '',
             isLoading: true,
+            rainIds: [],
             userNames: []
         }
     }
@@ -158,7 +175,6 @@ class EditableTable extends Component {
         return record.key === this.state.editingKey;
     };
 
-    //当存在编辑行时，不可在进行编辑
     edit(key) {
         const {editingKey} = this.state;
         if (editingKey === '') {
@@ -168,7 +184,6 @@ class EditableTable extends Component {
         }
     }
 
-    //如果是新增的项目，则取消时需要删除
     cancel(key) {
         const {isNew, data} = this.state;
         if (isNew) {
@@ -186,16 +201,12 @@ class EditableTable extends Component {
         }
     }
 
-    //删除用户时，会删除用户底下所有信息，包括所有设备以及大棚信息
     handleDelete = (key) => {
-        this.setState({
-            isLoading: true
-        });
-        const {data, userNames} = this.state;
+        const {data, rainIds} = this.state;
         const index = data.findIndex(item => key === item.key);
-        const item = data[index].username;
+        const item = data[index].rainId;
         const token = window.sessionStorage.getItem('token');
-        const url = 'http://47.92.206.44:80/api/user/' + item;
+        const url = 'http://47.92.206.44:80/api/raininfo/' + item;
         const opts = {
             method: 'DELETE',
             body: JSON.stringify(item),
@@ -205,15 +216,18 @@ class EditableTable extends Component {
                 'authorization': 'Bearer ' + token
             }
         };
+        this.setState({
+            isLoading: true
+        });
         fetch(url, opts)
             .then(response => response.status)
             .then(() => {
-                message.success('删除用户成功');
-                const userNameIndex = userNames.indexOf(item);
-                userNames.splice(userNameIndex, 1);
+                message.success('删除雨量成功');
+                const rainIdsIndex = rainIds.indexOf(item);
+                rainIds.splice(rainIdsIndex, 1);
                 this.setState({
                     isLoading: false,
-                    userNames: userNames,
+                    rainIds: rainIds,
                     data: data.filter(item => item.key !== key)
                 })
             })
@@ -232,11 +246,11 @@ class EditableTable extends Component {
         }
         const newData = {
             key: count,
-            username: '',
-            password: '123456',
-            role: '普通用户',
-            phone: '',
-            emailAddress: ''
+            rainId: '',
+            name: '',
+            location: '',
+            description: '',
+            username: ''
         };
         this.setState({
             editingKey: count,
@@ -252,29 +266,33 @@ class EditableTable extends Component {
             if (error) {
                 return false;
             }
-            const {data, isNew, userNames} = this.state;
+            const rainIdReg = new RegExp(/^([1-9][0-9]{7})$/);
+            const {data, isNew, rainIds, userNames} = this.state;
             const index = data.findIndex(item => key === item.key);
             const item = data[index];
             const newItem = {...item, ...row};
             const saveItem = {
+                rainId: newItem.rainId,
+                name: newItem.name,
+                location: newItem.location,
+                description: newItem.description,
                 username: newItem.username,
-                password: newItem.password,
-                role: newItem.role,
-                phone: newItem.phone,
-                emailAddress: newItem.emailAddress,
-                description: newItem.description
             };
-            if (userNames.indexOf(saveItem.username) > -1 && isNew) {
-                message.warning('此用户名已存在，请重新指定用户');
+            if (userNames.indexOf(saveItem.username) === -1) {
+                message.warning('此用户名不存在，请重新指定用户');
                 return false;
             }
-            if (isNew && saveItem.password === "") {
-                message.warning('新用户必须有初始密码');
+            if (!rainIdReg.test(saveItem.rainId)) {
+                message.warning('请输入8位正整数');
                 return false;
             }
-            saveItem.role = (saveItem.role === '普通用户') ? 'User' : 'Administrator';
+            if (rainIds.indexOf(saveItem.rainId) > -1 && isNew) {
+                message.warning('此雨量ID已存在，请重新分配雨量ID');
+                return false;
+            }
+
             const token = window.sessionStorage.getItem('token');
-            const url = 'http://47.92.206.44:80/api/user/' + newItem.username;
+            const url = 'http://47.92.206.44:80/api/raininfo/' + newItem.rainId;
             const opts = {
                 method: 'PUT',
                 body: JSON.stringify(saveItem),
@@ -293,13 +311,13 @@ class EditableTable extends Component {
                     message.success('添加成功');
                     data.splice(index, 1, newItem);
                     if (isNew) {
-                        userNames.push(newItem.username);
+                        rainIds.push(newItem.rainId);
                     }
                     this.setState({
                         isLoading: false,
                         data: data,
                         isNew: false,
-                        userNames: userNames,
+                        rainIds: rainIds,
                         editingKey: ''
                     })
                 })
@@ -320,7 +338,8 @@ class EditableTable extends Component {
 
     componentDidMount() {
         const token = window.sessionStorage.getItem('token');
-        const url = 'http://47.92.206.44:80/api/user';
+        const urlUser = 'http://47.92.206.44:80/api/user';
+        const urlRainInfo = 'http://47.92.206.44:80/api/raininfo';
         const option = {
             method: 'GET',
             headers: {
@@ -329,28 +348,42 @@ class EditableTable extends Component {
                 'authorization': 'Bearer ' + token
             }
         };
-        fetch(url, option)
-            .then(response => response.json())
-            .then((res) => {
-                res.map((item, index) => item.key = index);
-                res.map(item => item.role = `${item.role === 'User' ? '普通用户' : '管理员'}`);
-                let userNames = res.map(item => item.username);
+
+        const getUsers = new Promise((resolve, reject) => {
+            fetch(urlUser, option)
+                .then(response => response.json())
+                .then(res => resolve(res))
+                .catch(() => reject('获取用户信息失败'))
+        });
+        const getRainInfo = new Promise((resolve, reject) => {
+            fetch(urlRainInfo, option)
+                .then(response => response.json())
+                .then(res => resolve(res))
+                .catch(() => reject('获取雨量信息失败'))
+        });
+        Promise.all([getRainInfo, getUsers])
+            .then(result => {
+                result[0].map((item, index) => item.key = index);
+                let rainIds = result[0].map(item => item.rainId);
+                let userNames = result[1].map(item => item.username);
                 this.setState({
-                    userNames: userNames,
-                    count: res.length,
                     isLoading: false,
-                    data: res
+                    rainIds: rainIds,
+                    userNames: userNames,
+                    data: result[0],
+                    count: result[0].length
                 })
             })
             .catch(() => {
-                message.error('网络异常，请重新刷新页面');
+                message.error('网络异常，请刷新页面');
                 this.setState({
                     isLoading: false
                 })
-            })
+            });
     }
 
     render() {
+        const {isNew, userNames} = this.state;
         const components = {
             body: {
                 row: EditableFormRow,
@@ -361,13 +394,8 @@ class EditableTable extends Component {
             if (!col.editable) {
                 return col;
             }
-            if (col.dataIndex === 'username' && this.state.isNew === false) {
+            if (col.dataIndex === 'rainId' && isNew === false) {
                 return col;
-            }
-            if (col.dataIndex === 'password' && this.state.isNew === true) {
-                col.isRequired = true;
-            } else {
-                col.isRequired = false;
             }
             return {
                 ...col,
@@ -376,6 +404,7 @@ class EditableTable extends Component {
                     dataIndex: col.dataIndex,
                     isRequired: col.isRequired,
                     title: col.title,
+                    userNames: userNames,
                     editing: this.isEditing(record)
                 })
             }
@@ -384,7 +413,7 @@ class EditableTable extends Component {
         return (
             <div>
                 <Button onClick={this.handleAdd} type="primary" className='add-row-button'>
-                    <Icon type="plus-circle"/>新增用户
+                    <Icon type="plus-circle"/>新增雨量
                 </Button>
                 <Spin spinning={this.state.isLoading}>
                     <Table

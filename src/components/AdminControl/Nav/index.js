@@ -26,8 +26,14 @@ class Index extends Component {
                     <Menu.Item key="user">
                         <Link to="/admin/user"><Icon type="user"/>用户管理</Link>
                     </Menu.Item>
+                    <Menu.Item key="rainInfo">
+                        <Link to="/admin/raininfo"><Icon type="radar-chart"/>雨量管理</Link>
+                    </Menu.Item>
                     <Menu.Item key="equipment">
                         <Link to="/admin/equip"><Icon type="radar-chart"/>设备管理</Link>
+                    </Menu.Item>
+                    <Menu.Item key="record">
+                        <Link to="/admin/record"><Icon type="radar-chart"/>维修记录</Link>
                     </Menu.Item>
                 </Menu>
             </Layout>
