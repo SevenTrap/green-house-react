@@ -74,35 +74,29 @@ class EditableTable extends Component {
         super(props);
         this.columns = [
             {
-                title: '雨量设备ID',
-                dataIndex: 'rainId',
-                editable: true,
-                isRequired: true,
-                width: '15%'
-            }, {
-                title: '雨量名称',
-                dataIndex: 'name',
-                editable: true,
-                isRequired: true,
-                width: '15%'
-            }, {
-                title: '安装位置',
-                dataIndex: 'location',
-                editable: true,
-                isRequired: true,
-                width: '15%'
-            }, {
-                title: '详情',
-                dataIndex: 'description',
-                editable: true,
-                isRequired: true,
-                width: '25%'
-            }, {
                 title: '归属用户',
                 dataIndex: 'username',
                 editable: true,
                 isRequired: true,
-                width: '15%',
+                width: '20%',
+            }, {
+                title: '雨量设备ID',
+                dataIndex: 'rainId',
+                editable: true,
+                isRequired: true,
+                width: '20%'
+            }, {
+                title: '雨量安装位置',
+                dataIndex: 'location',
+                editable: true,
+                isRequired: true,
+                width: '20%'
+            }, {
+                title: '详情',
+                dataIndex: 'description',
+                editable: true,
+                isRequired: false,
+                width: '25%'
             }, {
                 title: '操作',
                 dataIndex: 'operation',
@@ -273,7 +267,6 @@ class EditableTable extends Component {
             const newItem = {...item, ...row};
             const saveItem = {
                 rainId: newItem.rainId,
-                name: newItem.name,
                 location: newItem.location,
                 description: newItem.description,
                 username: newItem.username,
@@ -395,6 +388,9 @@ class EditableTable extends Component {
                 return col;
             }
             if (col.dataIndex === 'rainId' && isNew === false) {
+                return col;
+            }
+            if (col.dataIndex === 'username' && isNew === false) {
                 return col;
             }
             return {

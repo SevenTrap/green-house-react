@@ -11,6 +11,7 @@ class NormalLoginForm extends Component {
         event.preventDefault();
         this.props.form.validateFields((err, values) => {
             if (!err) {
+                const url = 'http://47.92.206.44:80/api/login';
                 const opts = {
                     method: 'POST',
                     body: JSON.stringify(values),
@@ -20,7 +21,7 @@ class NormalLoginForm extends Component {
                     }
                 };
 
-                fetch('http://47.92.206.44:80/api/login', opts)
+                fetch(url, opts)
                     .then((response) => {
                         if (response.status === 200) {
                             return response.json()

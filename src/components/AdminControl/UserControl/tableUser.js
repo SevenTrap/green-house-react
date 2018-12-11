@@ -252,6 +252,8 @@ class EditableTable extends Component {
             if (error) {
                 return false;
             }
+            const passwordReg = new RegExp(/^(\w){6,10}$/);
+            const usernameReg = new RegExp(/^\s+/);
             const {data, isNew, userNames} = this.state;
             const index = data.findIndex(item => key === item.key);
             const item = data[index];
@@ -264,6 +266,14 @@ class EditableTable extends Component {
                 emailAddress: newItem.emailAddress,
                 description: newItem.description
             };
+            if (!usernameReg.test(saveItem.username)) {
+                message.warning('用户名不能包含空格');
+                return false;
+            }
+            if (saveItem.password !== "" && !passwordReg.test(saveItem.password)) {
+                message.warning('密码由6~10位的数字、字母、下划线组成');
+                return false;
+            }
             if (userNames.indexOf(saveItem.username) > -1 && isNew) {
                 message.warning('此用户名已存在，请重新指定用户');
                 return false;
@@ -364,10 +374,8 @@ class EditableTable extends Component {
             if (col.dataIndex === 'username' && this.state.isNew === false) {
                 return col;
             }
-            if (col.dataIndex === 'password' && this.state.isNew === true) {
-                col.isRequired = true;
-            } else {
-                col.isRequired = false;
+            if (col.dataIndex === 'password') {
+                col.isRequired = this.state.isNew
             }
             return {
                 ...col,
