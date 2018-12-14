@@ -1,16 +1,6 @@
 import React, {Component} from 'react';
-import {List, Row, Col, Button, message, AutoComplete, Drawer, Spin, Input, Icon, Form} from 'antd';
-
-const listData = [];
-for (let i = 0; i < 23; i++) {
-    listData.push({
-        key: i,
-        dateTime: '2018-12-06',
-        username: `admin`,
-        deviceId: '99999999',
-        content: 'We supply a series of design principles, practical patterns and high quality design resources (Sketch and Axure), to help people create their product prototypes beautifully and efficiently.',
-    });
-}
+import {List, Row, Col, Button, message, AutoComplete, Drawer, Spin, Input, Icon, Form, Popconfirm} from 'antd';
+import moment from 'moment';
 
 class Index extends Component {
     constructor(props) {
@@ -44,7 +34,7 @@ class Index extends Component {
             newDeviceIds: newDeviceId
         })
     };
-    handlePush = (event) => {
+    handlePush = () => {
         this.props.form.validateFields((error, values) => {
             if (!error) {
                 const url = 'http://47.92.206.44:80/api/adminlog';
@@ -60,23 +50,56 @@ class Index extends Component {
                 };
                 fetch(url, opts)
                     .then(response => response.status)
-                    .then(res => {
-                        console.log(res);
+                    .then(() => {
                         message.success('信息提交成功');
                         this.setState({
                             drawerVisible: false
-                        })
+                        });
+                        this.getData();
                     })
                     .catch(() => {
                         message.error('提交失败，请重新提交');
-
                     })
             }
 
         })
     };
+    handleDelete = (key) => {
+        const url = `http://47.92.206.44:80/api/adminlog/${key}`;
+        const token = window.sessionStorage.getItem('token');
+        const opts = {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'authorization': 'Bearer ' + token
+            }
+        };
+        fetch(url, opts)
+            .then(response => response.status)
+            .then(() => {
+                message.success('删除成功');
+                this.getData();
+            })
+            .catch(() => {
+                message.error('网络异常，请重新尝试')
+            })
+    };
+    handleSearch = (value) => {
+        const {data} = this.state;
+        if (value === "") {
+            this.setState({
+                list: data
+            });
+            return false;
+        }
+        const newData = data.filter(item => (item.targetid.indexOf(value) > -1) ? item : null);
+        this.setState({
+            list: newData
+        })
+    };
 
-    componentDidMount() {
+    getData = () => {
         const token = window.sessionStorage.getItem('token');
         const urlData = `http://47.92.206.44:80/api/adminlog`;
         const urlDeviceId = `http://47.92.206.44:80/api/device`;
@@ -102,13 +125,13 @@ class Index extends Component {
         });
         Promise.all([getData, getDeviceId])
             .then(result => {
-                console.log(result);
                 result[0].map((item, index) => item.key = index);
                 const deviceIds = result[1].map(item => item.deviceId);
                 this.setState({
                     deviceIds: deviceIds,
                     newDeviceIds: deviceIds,
                     data: result[0],
+                    list: result[0],
                     count: result[0].length,
                     initLoading: false
                 })
@@ -119,10 +142,14 @@ class Index extends Component {
                     initLoading: false
                 })
             });
+    };
+
+    componentDidMount() {
+        this.getData();
     }
 
     render() {
-        const {data, initLoading, drawerVisible, newDeviceIds} = this.state;
+        const {list, initLoading, drawerVisible, newDeviceIds} = this.state;
         const { getFieldDecorator } = this.props.form;
         return (
             <div>
@@ -202,7 +229,7 @@ class Index extends Component {
                         <Input.Search
                             addonBefore='控制器ID'
                             enterButton="搜索"
-                            onSearch={value => console.log(value)}
+                            onSearch={this.handleSearch}
                         />
                     </Col>
                     <Col span={6} offset={12}>
@@ -224,12 +251,21 @@ class Index extends Component {
                                 },
                                 pageSize: 10
                             }}
-                            dataSource={data}
+                            dataSource={list}
                             renderItem={item => (
                                 <List.Item
                                     key={item.key}
-                                    actions={[item.dateTime, item.key]}
-                                    extra={`控制器ID：${item.targetid}`}
+                                    actions={[moment(item.dateTime).format('YYYY-MM-DD'), `控制器ID：${item.targetid}`]}
+                                    extra={
+                                        <Popconfirm
+                                            title="确认删除?"
+                                            onConfirm={() => this.handleDelete(item.id)}
+                                            okText='确定'
+                                            cancelText='取消'
+                                        >
+                                            <Button type='danger'>删除</Button>
+                                        </Popconfirm>
+                                        }
                                 >
                                     <List.Item.Meta
                                         title={item.subject}
