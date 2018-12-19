@@ -13,11 +13,6 @@ const EditableRow = ({form, index, ...props}) => (
 const EditableFormRow = Form.create()(EditableRow);
 
 class EditableCell extends Component {
-    //判断输入框的类型
-    getInput = () => {
-        return <Input/>
-    };
-
     render() {
         const {
             editing,
@@ -40,7 +35,7 @@ class EditableCell extends Component {
                                             message: `${title}不可为空`,
                                         }],
                                         initialValue: record[dataIndex]
-                                    })(this.getInput())}
+                                    })(<Input />)}
                                 </FormItem>
                             ) : restProps.children}
                         </td>
@@ -71,7 +66,7 @@ class EditableTable extends Component {
                 title: '位置',
                 dataIndex: 'location',
                 editable: true,
-                isRequired: false,
+                isRequired: true,
                 width: '20%'
             }, {
                 title: '描述',
@@ -142,6 +137,7 @@ class EditableTable extends Component {
             data: [],
             Username: window.sessionStorage.getItem('Username'),
             editingKey: '',
+            greenHouseNames: [],
             count: '',
             isNew: false,
             isLoading: false
@@ -154,12 +150,11 @@ class EditableTable extends Component {
 
     edit(key) {
         const {editingKey} = this.state;
-        if (editingKey) {
-            return false;
+        if (editingKey === "") {
+            this.setState({
+                editingKey: key
+            })
         }
-        this.setState({
-            editingKey: key
-        })
     }
 
     cancel(key) {
@@ -183,12 +178,12 @@ class EditableTable extends Component {
         this.setState({
             isLoading: true
         });
-        const {data} = this.state;
+        const {data, greenHouseNames} = this.state;
         const token = window.sessionStorage.getItem('token');
-
         const index = data.findIndex(item => key === item.key);
         const item = data[index];
         const greenHouseId = item.greenHouseId;
+        const greenHouseName = item.name;
 
         const url = 'http://47.92.206.44:80/api/greenhouse/' + greenHouseId;
         const opts = {
@@ -201,15 +196,18 @@ class EditableTable extends Component {
             }
         };
         fetch(url, opts)
-            .then((response) => console.log(response.status))
-            .then((res) => {
+            .then((response) => response.status)
+            .then(() => {
                 message.success('删除成功');
+                const greenHouseNameIndex = greenHouseNames.indexOf(greenHouseName);
+                greenHouseNames.splice(greenHouseNameIndex, 1);
                 this.setState({
                     isLoading: false,
+                    greenHouseNames: greenHouseNames,
                     data: data.filter(item => item.key !== key)
                 })
             })
-            .catch((error) => {
+            .catch(() => {
                 message.error('删除失败');
                 this.setState({
                     isLoading: false
@@ -247,10 +245,8 @@ class EditableTable extends Component {
             if (error) {
                 return false;
             }
-            this.setState({
-                isLoading: true
-            });
-            const {data, isNew, Username} = this.state;
+
+            const {data, isNew, Username, greenHouseNames} = this.state;
             const index = data.findIndex(item => key === item.key);
             const item = data[index];
             const newItem = {...item, ...row};
@@ -261,6 +257,11 @@ class EditableTable extends Component {
                 username: Username,
                 description: newItem.description
             };
+
+            if (isNew && greenHouseNames.indexOf(saveItem.name) > -1) {
+                message.warning('此大棚名称已经存在，请修改');
+                return false;
+            }
 
             const token = window.sessionStorage.getItem('token');
             const url = 'http://47.92.206.44:80/api/greenhouse/' + newItem.greenHouseId;
@@ -273,25 +274,26 @@ class EditableTable extends Component {
                     'authorization': 'Bearer ' + token
                 }
             };
-
+            this.setState({
+                isLoading: true
+            });
             fetch(url, opts)
-                .then((response) => {
-                    console.log(response.status);
-                    if (response.status === 401) {
-                        return Promise.reject('您没有权限');
-                    }
-                })
-                .then((res) => {
+                .then((response) => response.status)
+                .then(() => {
                     message.success('添加成功');
                     data.splice(index, 1, newItem);
+                    if (isNew) {
+                        greenHouseNames.push(saveItem.name);
+                    }
                     this.setState({
                         data: data,
                         isNew: false,
+                        greenHouseNames: greenHouseNames,
                         isLoading: false,
                         editingKey: ''
                     })
                 })
-                .catch((error) => {
+                .catch(() => {
                     message.error('添加失败');
                     if (isNew) {
                         data.splice(index, 1);
@@ -326,14 +328,16 @@ class EditableTable extends Component {
             .then((responseText) => {
                 if (responseText) {
                     responseText.map((item, index) => item.key = index);
+                    const greenHouseNames = responseText.map(item => item.name);
                     this.setState({
                         count: responseText.length,
                         isLoading: false,
+                        greenHouseNames: greenHouseNames,
                         data: responseText
                     })
                 }
             })
-            .catch((error) => {
+            .catch(() => {
                 message.error('获取信息失败');
                 this.setState({
                     isLoading: false
@@ -367,7 +371,6 @@ class EditableTable extends Component {
                 })
             }
         });
-
         return (
             <div>
                 <Button onClick={this.handleAdd} type="primary" className='add-row-button'>

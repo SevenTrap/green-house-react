@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Table, Input, Button, Popconfirm, Form, Select, Spin, Icon} from 'antd';
+import {Table, Input, Button, Popconfirm, Form, Select, AutoComplete, Spin, Icon} from 'antd';
 import {message} from "antd/lib/index";
 
 let deviceNameToPos = {};
@@ -28,14 +28,47 @@ const EditableRow = ({form, index, ...props}) => (
 const EditableFormRow = Form.create()(EditableRow);
 
 class EditableCell extends Component {
-    //判断输入框的类型
+    constructor(props) {
+        super(props);
+        this.state = {
+            greenHouseName: this.props.greenHouseName,
+            deviceId: this.props.deviceId
+        }
+    }
+    handleGreenHouseName = (value) => {
+        const {greenHouseName} = this.props;
+        if (value === "") {
+            this.setState({
+                greenHouseName: greenHouseName
+            })
+        }
+        const newData = greenHouseName.filter(item => (item.indexOf(value) > -1) ? item : null);
+        this.setState({
+            greenHouseName: newData
+        })
+    };
+    handleDeviceId = (value) => {
+        const {deviceId} = this.props;
+        if (value === "") {
+            this.setState({
+                deviceId: deviceId
+            })
+        }
+        const newData = deviceId.filter(item => (item.indexOf(value) > -1) ? item : null);
+        this.setState({
+            deviceId: newData
+        })
+    };
     getInput = () => {
+        const {greenHouseName, deviceId} = this.state;
         if (this.props.dataIndex === 'greenHouseName') {
-            const options = this.props.greenHouseName.map(item => <Option key={item}>{item}</Option>);
             return (
-                <Select style={{width: '100%'}}>
-                    {options}
-                </Select>
+                <AutoComplete
+                    dataSource={greenHouseName}
+                    style={{width: '100%'}}
+                    onChange={this.handleGreenHouseName}
+                    placeholder='请选择温室名称'
+                />
             )
         } else if (this.props.dataIndex === 'deviceName') {
             const options = deviceName.map(item => <Option key={item}>{item}</Option>);
@@ -45,11 +78,13 @@ class EditableCell extends Component {
                 </Select>
             )
         } else if (this.props.dataIndex === 'deviceId') {
-            const options = this.props.deviceId.map(item => <Option key={item}>{item}</Option>);
             return (
-                <Select style={{width: 200}}>
-                    {options}
-                </Select>
+                <AutoComplete
+                    dataSource={deviceId}
+                    style={{width: '100%'}}
+                    onChange={this.handleDeviceId}
+                    placeholder='请选择控制器编号'
+                />
             )
         } else {
             return <Input/>
@@ -194,12 +229,11 @@ class EditableTable extends Component {
 
     edit(key) {
         const {editingKey} = this.state;
-        if (editingKey) {
-            return false;
+        if (editingKey === "") {
+            this.setState({
+                editingKey: key
+            })
         }
-        this.setState({
-            editingKey: key
-        })
     }
 
     cancel(key) {
@@ -242,14 +276,14 @@ class EditableTable extends Component {
         };
         fetch(url, opts)
             .then((response) => console.log(response.status))
-            .then((res) => {
+            .then(() => {
                 message.success('删除成功');
                 this.setState({
                     isLoading: false,
                     data: data.filter(item => item.key !== key)
                 })
             })
-            .catch((error) => {
+            .catch(() => {
                 message.error('删除失败');
                 this.setState({
                     isLoading: false
@@ -282,9 +316,7 @@ class EditableTable extends Component {
             if (error) {
                 return false;
             }
-            this.setState({
-                isLoading: true
-            });
+
             const {data, isNew, greenHouseNameToId} = this.state;
             const index = data.findIndex(item => key === item.key);
             const item = data[index];
@@ -308,7 +340,9 @@ class EditableTable extends Component {
                     'authorization': 'Bearer ' + token
                 }
             };
-
+            this.setState({
+                isLoading: true
+            });
             fetch(url, opts)
                 .then((response) => {
                     console.log(response.status);
@@ -316,7 +350,7 @@ class EditableTable extends Component {
                         return Promise.reject('您没有权限');
                     }
                 })
-                .then((res) => {
+                .then(() => {
                     message.success('保存成功');
                     data.splice(index, 1, newItem);
                     this.setState({
@@ -326,7 +360,7 @@ class EditableTable extends Component {
                         editingKey: ''
                     })
                 })
-                .catch((error) => {
+                .catch(() => {
                     message.error('添加失败');
                     if (isNew) {
                         data.splice(index, 1);

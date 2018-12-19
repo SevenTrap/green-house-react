@@ -16,18 +16,18 @@ class EditableCell extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            userNames: this.props.userNames
+            rainIds: this.props.rainIds
         }
     }
     //判断输入框的类型
     getInput = () => {
-        if (this.props.dataIndex === 'username') {
+        if (this.props.dataIndex === 'rainId') {
             return (
                 <AutoComplete
-                    dataSource={this.state.userNames}
+                    dataSource={this.state.rainIds}
                     style={{width: '100%'}}
                     onSearch={this.handleUserNameSearch}
-                    placeholder='请选择用户'
+                    placeholder='请选择雨量'
                 />
             )
         } else {
@@ -35,10 +35,10 @@ class EditableCell extends Component {
         }
     };
     handleUserNameSearch = (value) => {
-        const {userNames} = this.props;
-        const newUserName = userNames.filter(item => (item.indexOf(value) > -1) ? item : null);
+        const {rainIds} = this.props;
+        const newRainIds = rainIds.filter(item => (item.indexOf(value) > -1) ? item : null);
         this.setState({
-            userNames: newUserName
+            rainIds: newRainIds
         })
     };
     render() {
@@ -48,7 +48,7 @@ class EditableCell extends Component {
             title,
             isRequired,
             record,
-            userNames,
+            rainIds,
             ...restProps
         } = this.props;
         return (
@@ -79,18 +79,18 @@ class EditableTable extends Component {
     constructor(props) {
         super(props);
         this.columns = [
-            {
-                title: '归属用户',
-                dataIndex: 'username',
+           {
+                title: '控制器ID',
+                dataIndex: 'deviceId',
+                editable: false,
+                isRequired: true,
+                width: '20%',
+            },  {
+                title: '雨量设备ID',
+                dataIndex: 'rainId',
                 editable: true,
                 isRequired: true,
                 width: '20%'
-            }, {
-                title: '控制器ID',
-                dataIndex: 'deviceId',
-                editable: true,
-                isRequired: true,
-                width: '20%',
             }, {
                 title: '控制器安装位置',
                 dataIndex: 'location',
@@ -162,7 +162,7 @@ class EditableTable extends Component {
 
         this.state = {
             data: [],
-            userNames: [],
+            rainIds : [],
             deviceIds: [],
             editingKey: '',
             isNew: false,
@@ -249,7 +249,7 @@ class EditableTable extends Component {
         const newData = {
             key: count,
             deviceId: '',
-            username: '',
+            rainId: '',
             location: '',
             description: ''
         };
@@ -342,7 +342,7 @@ class EditableTable extends Component {
 
         const token = window.sessionStorage.getItem('token');
         const urlGetData = 'http://47.92.206.44:80/api/device';
-        const urlGetUser = 'http://47.92.206.44:80/api/user';
+        const urlGetUser = 'http://47.92.206.44:80/api/raininfo';
         const options = {
             method: 'GET',
             headers: {
@@ -363,24 +363,24 @@ class EditableTable extends Component {
                 .then(responseText => resolve(responseText))
                 .catch(error => reject(error))
         });
-        const fetchGetUserData = new Promise((resolve, reject) => {
+        const fetchGetRainIDData = new Promise((resolve, reject) => {
             fetch(urlGetUser, options)
                 .then(response => response.json())
                 .then(responseText => resolve(responseText))
                 .catch(error => reject(error))
         });
-        const getData = Promise.all([fetchGetData, fetchGetUserData])
+        const getData = Promise.all([fetchGetData, fetchGetRainIDData])
             .then(result => Promise.resolve(result))
             .catch(error => Promise.reject(error));
         Promise.race([timeOutPromise, getData])
             .then(result => {
                 result[0].map((item, index)=> item.key = index);
-                const userNames = result[1].map(item => item.username);
+                const rainIds = result[1].map(item => item.raindId);
                 const deviceIds = result[0].map(item => item.deviceId);
                 this.setState({
                     data: result[0],
                     count: result[0].length,
-                    userNames: userNames,
+                    rainIds: rainIds,
                     deviceIds: deviceIds,
                     isLoading: false
                 })
@@ -394,7 +394,7 @@ class EditableTable extends Component {
     }
 
     render() {
-        const {isNew, userNames} = this.state;
+        const {isNew, rainIds} = this.state;
         const components = {
             body: {
                 row: EditableFormRow,
@@ -417,7 +417,7 @@ class EditableTable extends Component {
                     record,
                     dataIndex: col.dataIndex,
                     title: col.title,
-                    userNames: userNames,
+                    rainIds: rainIds,
                     isRequired: col.isRequired,
                     editing: this.isEditing(record)
                 })

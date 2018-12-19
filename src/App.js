@@ -15,8 +15,11 @@ import PrivatePublicRoute from './PrivatePublicRoute';
 import PublicLogin from './components/PublicControl/Login';
 import GHAdd from './components/PublicControl/GHAdd';
 import GHBind from './components/PublicControl/GHBind';
+import GHRain from './components/PublicControl/GHRain';
 import GHControl from './components/PublicControl/GHControl';
+import GHSingle from './components/PublicControl/GHSingle';
 import PwdChange from './components/PublicControl/PwdChange';
+import Record from './components/PublicControl/Record';
 
 class App extends Component {
     render() {
@@ -33,8 +36,11 @@ class App extends Component {
                     <Route path="/public/Login" component={PublicLogin}/>
                     <PrivatePublicRoute path="/public/GHAdd" component={GHAdd}/>
                     <PrivatePublicRoute path="/public/GHBind" component={GHBind}/>
+                    <PrivatePublicRoute path="/public/GHRain" component={GHRain}/>
                     <PrivatePublicRoute path="/public/GHControl" component={GHControl}/>
+                    <PrivatePublicRoute path="/public/GHSingle" component={GHSingle}/>
                     <PrivatePublicRoute path="/public/PwdChange" component={PwdChange}/>
+                    <PrivatePublicRoute path="/public/Record" component={Record}/>
                     <Route component={PublicLogin}/>
                 </Switch>
             </BrowserRouter>
