@@ -95,7 +95,6 @@ class EditableCell extends Component {
         const {
             editing,
             dataIndex,
-            isRequired,
             title,
             record,
             greenHouseName,
@@ -111,7 +110,7 @@ class EditableCell extends Component {
                                 <FormItem style={{margin: 0}}>
                                     {form.getFieldDecorator(dataIndex, {
                                         rules: [{
-                                            required: isRequired,
+                                            required: true,
                                             message: `${title}不可为空!!!`,
                                         }],
                                         initialValue: record[dataIndex]
@@ -134,25 +133,21 @@ class EditableTable extends Component {
                 title: '温室名称',
                 dataIndex: 'greenHouseName',
                 editable: true,
-                isRequired: true,
                 width: '20%'
             }, {
                 title: '设备位置',
                 dataIndex: 'greenHousePos',
                 editable: true,
-                isRequired: true,
                 width: '20%'
             }, {
                 title: '控制器编号',
                 dataIndex: 'deviceId',
                 editable: true,
-                isRequired: true,
                 width: '20%'
             }, {
                 title: '设备名称',
                 dataIndex: 'deviceName',
                 editable: true,
-                isRequired: true,
                 width: '20%',
             }, {
                 title: '操作',
@@ -210,16 +205,17 @@ class EditableTable extends Component {
                 }
             }
         ];
-
         this.state = {
             data: [],
             greenHouseIdToName: [],
             greenHouseNameToId: [],
             greenHouseName: [],
+            greenHouseIdAndPos: [],
+            deviceIdAndPos: [],
             editingKey: '',
             count: '',
             isNew: false,
-            isLoading: false
+            isLoading: true
         }
     }
 
@@ -253,10 +249,11 @@ class EditableTable extends Component {
     }
 
     handleDelete = (key) => {
-        this.setState({
-            isLoading: true
-        });
-        const {data} = this.state;
+        const {data, greenHouseIdAndPos, deviceIdAndPos, editingKey} = this.state;
+        if (editingKey !== "") {
+            message.warning('处于编辑中');
+            return false;
+        }
         const token = window.sessionStorage.getItem('token');
         const index = data.findIndex(item => key === item.key);
         const item = data[index];
@@ -264,6 +261,8 @@ class EditableTable extends Component {
             greenHouseId: item.greenHouseId,
             greenHousePos: item.greenHousePos
         };
+        let greenHouseIdAndPosItem = `${item.greenHouseId} ${item.greenHousePos}`;
+        let deviceIdAndPosItem = `${item.deviceId} ${item.devicePos} ${key}`;
         const url = 'http://47.92.206.44:80/api/greenhousemap';
         const opts = {
             method: 'DELETE',
@@ -274,12 +273,19 @@ class EditableTable extends Component {
                 'authorization': 'Bearer ' + token
             }
         };
+        this.setState({
+            isLoading: true
+        });
         fetch(url, opts)
             .then((response) => console.log(response.status))
             .then(() => {
                 message.success('删除成功');
+                greenHouseIdAndPos.splice(greenHouseIdAndPos.findIndex(item => item === greenHouseIdAndPosItem), 1);
+                deviceIdAndPos.splice(deviceIdAndPos.findIndex(item => item === deviceIdAndPosItem), 1);
                 this.setState({
                     isLoading: false,
+                    greenHouseIdAndPos: greenHouseIdAndPos,
+                    deviceIdAndPos: deviceIdAndPos,
                     data: data.filter(item => item.key !== key)
                 })
             })
@@ -293,7 +299,7 @@ class EditableTable extends Component {
 
     handleAdd = () => {
         const {data, count, editingKey} = this.state;
-        if (editingKey) {
+        if (editingKey !== "") {
             return false
         }
         const newData = {
@@ -316,69 +322,152 @@ class EditableTable extends Component {
             if (error) {
                 return false;
             }
-
             const {data, isNew, greenHouseNameToId} = this.state;
             const index = data.findIndex(item => key === item.key);
             const item = data[index];
             const newItem = {...item, ...row};
             const greenHouseId = greenHouseNameToId[newItem.greenHouseName];
-            let lastData = {
-                greenHouseId: greenHouseId,
-                greenHousePos: newItem.greenHousePos,
-                deviceId: newItem.deviceId,
-                devicePos: deviceNameToPos[newItem.deviceName],
-            };
-            let arr = [lastData];
-            const token = window.sessionStorage.getItem('token');
-            const url = 'http://47.92.206.44:80/api/greenhousemap/' + greenHouseId;
-            const opts = {
-                method: 'PATCH',
-                body: JSON.stringify(arr),
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'authorization': 'Bearer ' + token
-                }
-            };
-            this.setState({
-                isLoading: true
-            });
-            fetch(url, opts)
-                .then((response) => {
-                    console.log(response.status);
-                    if (response.status === 401) {
-                        return Promise.reject('您没有权限');
-                    }
-                })
-                .then(() => {
-                    message.success('保存成功');
-                    data.splice(index, 1, newItem);
-                    this.setState({
-                        data: data,
-                        isNew: false,
-                        isLoading: false,
-                        editingKey: ''
-                    })
-                })
-                .catch(() => {
-                    message.error('添加失败');
-                    if (isNew) {
-                        data.splice(index, 1);
-                        this.setState({
-                            data: data,
-                            isNew: false,
-                            isLoading: false,
-                            editingKey: ''
-                        })
-                    }
-                });
+            console.log(newItem, greenHouseId, key);
+            if (isNew) {
+                this.handlePushNewItem(newItem, greenHouseId, key, index);
+            } else {
+                this.handleChangeOldItem(newItem, greenHouseId, key, index);
+            }
         })
     };
 
-    componentDidMount() {
+    handlePushNewItem = (item, greenHouseId, key, index) => {
+        const {data, greenHouseIdAndPos, deviceIdAndPos} = this.state;
+        let newItem = [{
+            greenHouseId: greenHouseId,
+            greenHousePos: item.greenHousePos,
+            deviceId: item.deviceId,
+            devicePos: deviceNameToPos[item.deviceName],
+        }];
+        const greenHouseIdAndPosItem = `${greenHouseId} ${item.greenHousePos}`;
+        const deviceIdAndPosItem = `${newItem[0].deviceId} ${newItem[0].devicePos}`;
+        const deviceIdAndPosItemKey = `${newItem[0].deviceId} ${newItem[0].devicePos} ${key}`;
+        let greenHouseIdAndPosItemIndex = greenHouseIdAndPos.findIndex(item => item === greenHouseIdAndPosItem);
+        let deviceIdAndPosItemIndex = true;
+        for (let i = 0; i < deviceIdAndPos.length; i++) {
+            let deviceIdArr = deviceIdAndPos[i].split(" ");
+            let temp = `${deviceIdArr[0]} ${deviceIdArr[1]}`;
+            if (deviceIdAndPosItem === temp) {
+                deviceIdAndPosItemIndex = false;
+            }
+        }
+        if (!deviceIdAndPosItemIndex) {
+            message.warning('此控制器的设备已绑定大棚');
+            return false;
+        }
+        if (greenHouseIdAndPosItemIndex > -1) {
+            message.warning('此大棚下的设备位置已重复');
+            return false;
+        }
+
+        const token = window.sessionStorage.getItem('token');
+        const url = 'http://47.92.206.44:80/api/greenhousemap/' + greenHouseId;
+        const opts = {
+            method: 'PATCH',
+            body: JSON.stringify(newItem),
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'authorization': 'Bearer ' + token
+            }
+        };
         this.setState({
             isLoading: true
         });
+        fetch(url, opts)
+            .then(response => response.status)
+            .then(() =>{
+                data.splice(index, 1, item);
+                message.success('数据上传成功');
+                greenHouseIdAndPos.push(greenHouseIdAndPosItem);
+                deviceIdAndPos.push(deviceIdAndPosItemKey);
+                this.setState({
+                    data: data,
+                    greenHouseIdAndPos: greenHouseIdAndPos,
+                    deviceIdAndPos: deviceIdAndPos,
+                    isNew: false,
+                    editingKey: '',
+                    isLoading: false
+                })
+            })
+            .catch(() => {
+                message.error("数据上传失败");
+                this.setState({
+                    isLoading: false
+                })
+            })
+    };
+
+    handleChangeOldItem = (item, greenHouseId, key, index) => {
+        const {data, deviceIdAndPos} = this.state;
+        let newItem = [{
+            greenHouseId: greenHouseId,
+            greenHousePos: item.greenHousePos,
+            deviceId: item.deviceId,
+            devicePos: deviceNameToPos[item.deviceName],
+        }];
+        const deviceIdAndPosItem = `${newItem[0].deviceId} ${newItem[0].devicePos}`;
+        const deviceIdAndPosItemKey = `${newItem[0].deviceId} ${newItem[0].devicePos} ${key}`;
+        let deviceIdAndPosItemIndex = true;
+        for (let i = 0; i < deviceIdAndPos.length; i++) {
+            let deviceIdArr = deviceIdAndPos[i].split(" ");
+            if (`${key}` === deviceIdArr[2]) {
+                deviceIdAndPos.splice(i, 1);
+                break;
+            }
+        }
+        for (let i = 0; i < deviceIdAndPos.length; i++) {
+            let deviceIdArr = deviceIdAndPos[i].split(" ");
+            if (deviceIdAndPosItem === `${deviceIdArr[0]} ${deviceIdArr[1]}`) {
+                deviceIdAndPosItemIndex = false;
+            }
+        }
+        if (!deviceIdAndPosItemIndex) {
+            message.warning('此控制器的设备已绑定大棚');
+            return false;
+        }
+
+        const token = window.sessionStorage.getItem('token');
+        const url = 'http://47.92.206.44:80/api/greenhousemap/' + greenHouseId;
+        const opts = {
+            method: 'PATCH',
+            body: JSON.stringify(newItem),
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'authorization': 'Bearer ' + token
+            }
+        };
+        this.setState({
+            isLoading: true
+        });
+        fetch(url, opts)
+            .then(response => response.status)
+            .then(() =>{
+                data.splice(index, 1, item);
+                message.success('数据上传成功');
+                deviceIdAndPos.push(deviceIdAndPosItemKey);
+                this.setState({
+                    data: data,
+                    deviceIdAndPos: deviceIdAndPos,
+                    editingKey: '',
+                    isLoading: false
+                })
+            })
+            .catch(() => {
+                message.error("数据上传失败");
+                this.setState({
+                    isLoading: false,
+                })
+            })
+    };
+
+    componentDidMount() {
         const token = window.sessionStorage.getItem('token');
         const urlGreenHouseMap = 'http://47.92.206.44:80/api/greenhousemap';
         const urlGreenHouse = 'http://47.92.206.44:80/api/greenhouse';
@@ -395,19 +484,19 @@ class EditableTable extends Component {
             fetch(urlGreenHouseMap, opts)
                 .then((response) => response.json())
                 .then((res) => resolve(res))
-                .catch(error => reject('获取绑定信息失败'))
+                .catch(() => reject('获取绑定信息失败'))
         });
         const getGreenHouse = new Promise((resolve, reject) => {
             fetch(urlGreenHouse, opts)
                 .then((response) => response.json())
                 .then((res) => resolve(res))
-                .catch(error => reject('获取大棚信息失败'))
+                .catch(() => reject('获取大棚信息失败'))
         });
         const getDevice = new Promise((resolve, reject) => {
             fetch(urlDevice, opts)
                 .then((response) => response.json())
                 .then((res) => resolve(res))
-                .catch(error => reject('获取设备信息失败'))
+                .catch(() => reject('获取设备信息失败'))
         });
         Promise.all([getGreenHouseMap, getGreenHouse, getDevice])
             .then(result => {
@@ -421,9 +510,13 @@ class EditableTable extends Component {
                 result[0].map(item => item.greenHouseName = greenHouseIdToName[item.greenHouseId]);
                 result[0].map(item => item.deviceName = devicePosToName[item.devicePos]);
                 result[0].map((item, index) => item.key = index);
+                let deviceIdAndPos = result[0].map(item => `${item.deviceId} ${item.devicePos} ${item.key}`);
+                let greenHouseIdAndPos = result[0].map(item => `${item.greenHouseId} ${item.greenHousePos}`);
 
                 this.setState({
                     deviceId: deviceId,
+                    deviceIdAndPos: deviceIdAndPos,
+                    greenHouseIdAndPos: greenHouseIdAndPos,
                     greenHouseIdToName: greenHouseIdToName,
                     greenHouseNameToId: greenHouseNameToId,
                     greenHouseName: greenHouseName,
@@ -432,7 +525,7 @@ class EditableTable extends Component {
                     isLoading: false
                 })
             })
-            .catch(error => {
+            .catch(() => {
                 message.error('网络异常，请刷新页面');
                 this.setState({
                     isLoading: false
@@ -463,7 +556,6 @@ class EditableTable extends Component {
                 onCell: record => ({
                     record,
                     dataIndex: col.dataIndex,
-                    isRequired: col.isRequired,
                     greenHouseName: greenHouseName,
                     deviceId: deviceId,
                     title: col.title,
