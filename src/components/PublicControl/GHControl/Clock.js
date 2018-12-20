@@ -59,7 +59,6 @@ class Index extends Component {
                 message.error('命令下发失败');
             })
     };
-
     handleClose = () => {
         const {deviceIds} = this.props;
         const actionArray = deviceIds.map(item => {

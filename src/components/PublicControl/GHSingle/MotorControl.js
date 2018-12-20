@@ -13,7 +13,8 @@ class Index extends Component {
             motor1Max: '',
             motor2Max: '',
             motor1Min: '',
-            motor2Min: ''
+            motor2Min: '',
+            clock: ''
         }
     }
     handleMotor1Control = (e) => {
@@ -604,6 +605,107 @@ class Index extends Component {
             })
     };
 
+    handleClockInput = (e) => {
+        this.setState({
+            clock: e.target.value
+        })
+    };
+    handleClockControl = (e) => {
+        console.log(e.target.value);
+        const value = e.target.value;
+        const valueReg = new RegExp(/^(20|21|22|23|[0-1]\d)[0-5]\d$/);
+        const {clock, deviceIdStatus} = this.state;
+        const {deviceId} = this.props;
+        let actionItem = [];
+        let clockValue = "";
+        if (value === "0") {
+            actionItem = [{
+                deviceId: deviceId,
+                commandtype: '15',
+                action: `1 0000 0`
+            }];
+        }
+        else {
+            clockValue = clock;
+            actionItem = [{
+                deviceId: deviceId,
+                commandtype: '15',
+                action: `1 ${clock} 1`
+            }];
+        }
+        if (!valueReg.test(clock)) {
+            message.error('请输入正确的参数');
+            return false;
+        }
+        console.log(actionItem);
+        const token = window.sessionStorage.getItem('token');
+        const urlAction = 'http://47.92.206.44:80/api/action';
+        let options = {
+            method: 'POST',
+            body: JSON.stringify(actionItem),
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'authorization': 'Bearer ' + token
+            }
+        };
+        fetch(urlAction, options)
+            .then(response => response.status)
+            .then((status) => {
+                console.log(status);
+                message.success('命令下发成功');
+                this.setState({
+                    deviceIdStatus: {
+                        ...deviceIdStatus,
+                        clock: clockValue
+                    }
+                })
+            })
+            .catch(() => {
+                message.error('命令下发失败');
+            })
+    };
+    handleTimeOut = (value) => {
+        const valueReg =  new RegExp(/^[1-9][0-9]{0,2}$/);
+        if (!valueReg.test(value)) {
+            message.warning('请输入正确的参数');
+            return false;
+        }
+        const {deviceIdStatus} = this.state;
+        const {deviceId} = this.props;
+        let actionItem = [{
+            deviceId: deviceId,
+            commandtype: '09',
+            action: `1 ${value}`
+        }];
+        console.log(actionItem);
+        const token = window.sessionStorage.getItem('token');
+        const urlAction = 'http://47.92.206.44:80/api/action';
+        let options = {
+            method: 'POST',
+            body: JSON.stringify(actionItem),
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'authorization': 'Bearer ' + token
+            }
+        };
+        fetch(urlAction, options)
+            .then(response => response.status)
+            .then((status) => {
+                console.log(status);
+                message.success('命令下发成功');
+                this.setState({
+                    deviceIdStatus: {
+                        ...deviceIdStatus,
+                        timeout: value
+                    }
+                })
+            })
+            .catch(() => {
+                message.error('命令下发失败');
+            })
+    };
     componentDidMount() {
         const {deviceId} = this.props;
         const token = window.sessionStorage.getItem('token');
@@ -693,7 +795,15 @@ class Index extends Component {
         let is_online = deviceIdStatus.is_online;
         let rain = deviceIdStatus.rain;
         let rain_num = deviceIdStatus.rain_num;
+        let clockValue = (clock === null || clock === "") ? "0" : '1';
+        clock = (clockValue === "0") ? "关闭" : `${clock[0]}${clock[1]}:${clock[2]}${clock[3]}`;
+
+
+        is_online = (is_online === null) ? "0" : is_online;
+        rain = (rain_num === null || rain_num === "") ? "0" : rain;
+        rain_num = (rain_num === null || rain_num === "") ? "空" : rain_num;
         // console.log(station_num, clock, timeout, is_online, rain, rain_num);
+        // console.log(rain_num, rain);
 
         let serve_1_act = deviceIdStatus.serve_1_act;
         let serve_2_act = deviceIdStatus.serve_2_act;
@@ -713,16 +823,54 @@ class Index extends Component {
                     borderColor: is_online === '0' ? 'red' : '',
                     marginBottom: '10px'
                 }}
-                extra={
-                    <div style={{width: '700px'}}>
-                        {rain_num ?
-                            <p style={{float: 'left'}}>降雨量（雨量ID：{rain_num}）: <em style={{color: 'red'}}>{rain} </em>mm</p>
-                            : null
-                        }
-                        <Icon type='setting'/>&nbsp;{is_online === '0' ? '掉线' : '在线'}
-                    </div>
-                }
+                extra={<span><Icon type='setting'/> {is_online === '0' ? '掉线' : '在线'}</span>}
             >
+                <Row gutter={24}>
+                    <Col span={12}>
+                        <Card.Grid style={{width: '100%', textAlign: 'center'}}>
+                            <Row gutter={24}>
+                                <strong>定时闹钟(目前：<span style={{color: 'red'}}>{clock}</span>) &nbsp;&nbsp; (例如：0930)</strong>
+                            </Row>
+                            <Row gutter={24}>
+                                <Col span={12}>
+                                    <Input
+                                        addonBefore='闹钟时间'
+                                        placeholder="请输入闹钟时间"
+                                        onChange={this.handleClockInput}
+                                    />
+                                </Col>
+                                <Col span={12}>
+                                    <Radio.Group value={String(clockValue)}
+                                                 onChange={this.handleClockControl}>
+                                        <Radio.Button value='1'>打开</Radio.Button>
+                                        <Radio.Button value='0'>关闭</Radio.Button>
+                                    </Radio.Group>
+                                </Col>
+                            </Row>
+                        </Card.Grid>
+                    </Col>
+                    <Col span={12}>
+                        <Card.Grid style={{width: '50%', textAlign: 'center'}}>
+                            <Row gutter={24}>
+                                <strong>超时时间(单位：<span style={{color: 'red'}}>{`${timeout}`}</span> 分钟)</strong>
+                            </Row>
+                            <Row gutter={24}>
+                                <Input.Search style={{width: '80%'}}
+                                              placeholder='输入1～3位整数'
+                                              enterButton="提交"
+                                              onSearch={this.handleTimeOut}/>
+                            </Row>
+                        </Card.Grid>
+                        <Card.Grid style={{width: '50%', textAlign: 'center'}}>
+                            <Row gutter={24}>
+                                <strong>雨量设备ID：{rain_num}</strong>
+                            </Row>
+                            <Row gutter={24}>
+                                <p style={{marginBottom: '11px'}}>降雨量：<span style={{color: 'red'}}>{rain}</span> mm</p>
+                            </Row>
+                        </Card.Grid>
+                    </Col>
+                </Row>
                 <Row gutter={24}>
                     {greenHousePos0 ?
                         <Col span={12}>
@@ -768,10 +916,10 @@ class Index extends Component {
                                     </Row>
                                     <Row gutter={24}>
                                         <Col span={10}>
-                                            <Input value={motor1First} onChange={this.handleMotor1First} addonBefore="首开"/>
+                                            <Input value={motor1First} placeholder="输入1～3位整数" onChange={this.handleMotor1First} addonBefore="首开"/>
                                         </Col>
                                         <Col span={10}>
-                                            <Input value={motor1Second} onChange={this.handleMotor1Second} addonBefore="再开"/>
+                                            <Input value={motor1Second} placeholder="输入1～3位整数" onChange={this.handleMotor1Second} addonBefore="再开"/>
                                         </Col>
                                         <Col span={4}>
                                             <Button onClick={this.handleMotor1OpenTime} type="primary">
@@ -828,10 +976,10 @@ class Index extends Component {
                                     </Row>
                                     <Row gutter={24}>
                                         <Col span={10}>
-                                            <Input value={motor2First} onChange={this.handleMotor2First} addonBefore="首开"/>
+                                            <Input value={motor2First} placeholder="输入1～3位整数" onChange={this.handleMotor2First} addonBefore="首开"/>
                                         </Col>
                                         <Col span={10}>
-                                            <Input value={motor2Second} onChange={this.handleMotor2Second} addonBefore="再开"/>
+                                            <Input value={motor2Second} placeholder="输入1～3位整数" onChange={this.handleMotor2Second} addonBefore="再开"/>
                                         </Col>
                                         <Col span={4}>
                                             <Button onClick={this.handleMotor2OpenTime} type="primary">
@@ -873,10 +1021,10 @@ class Index extends Component {
                                     </Row>
                                     <Row gutter={24}>
                                         <Col span={10}>
-                                            <Input value={motor1Max} onChange={this.handleMotor1Max} addonBefore="上限"/>
+                                            <Input value={motor1Max} placeholder="0～60" onChange={this.handleMotor1Max} addonBefore="上限"/>
                                         </Col>
                                         <Col span={10}>
-                                            <Input value={motor1Min} onChange={this.handleMotor1Min} addonBefore="下限"/>
+                                            <Input value={motor1Min} placeholder="0～60" onChange={this.handleMotor1Min} addonBefore="下限"/>
                                         </Col>
                                         <Col span={4}>
                                             <Button onClick={this.handleMotor1Temp} type="primary">
@@ -916,10 +1064,10 @@ class Index extends Component {
                                     </Row>
                                     <Row gutter={24}>
                                         <Col span={10}>
-                                            <Input value={motor2Max} onChange={this.handleMotor2Max} addonBefore="上限"/>
+                                            <Input value={motor2Max} placeholder="0～60" onChange={this.handleMotor2Max} addonBefore="上限"/>
                                         </Col>
                                         <Col span={10}>
-                                            <Input value={motor2Min} onChange={this.handleMotor2Min} addonBefore="下限"/>
+                                            <Input value={motor2Min} placeholder="0～60" onChange={this.handleMotor2Min} addonBefore="下限"/>
                                         </Col>
                                         <Col span={4}>
                                             <Button onClick={this.handleMotor2Temp} type="primary">
