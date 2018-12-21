@@ -19,6 +19,7 @@ class EditableCell extends Component {
             rainIds: this.props.rainIds
         }
     }
+
     //判断输入框的类型
     getInput = () => {
         if (this.props.dataIndex === 'rainId') {
@@ -41,6 +42,7 @@ class EditableCell extends Component {
             rainIds: newRainIds
         })
     };
+
     render() {
         const {
             editing,
@@ -79,17 +81,17 @@ class EditableTable extends Component {
     constructor(props) {
         super(props);
         this.columns = [
-           {
+            {
                 title: '控制器ID',
                 dataIndex: 'deviceId',
                 editable: false,
                 isRequired: true,
                 width: '20%',
-            },  {
+            }, {
                 title: '雨量设备ID',
                 dataIndex: 'rainId',
                 editable: true,
-                isRequired: true,
+                isRequired: false,
                 width: '20%'
             }, {
                 title: '控制器安装位置',
@@ -143,14 +145,6 @@ class EditableTable extends Component {
                                     >
                                         修改
                                     </a>
-                                    <Popconfirm
-                                        title="确认删除?"
-                                        onConfirm={() => this.handleDelete(record.key)}
-                                        okText='确定'
-                                        cancelText='取消'
-                                    >
-                                        <a href='javascript:void(0);'>删除</a>
-                                    </Popconfirm>
                                     </span>
                                 )
                             }
@@ -162,12 +156,9 @@ class EditableTable extends Component {
 
         this.state = {
             data: [],
-            rainIds : [],
-            deviceIds: [],
+            rainIds: [],
             editingKey: '',
-            isNew: false,
-            isLoading: true,
-            count: ''
+            isLoading: true
         }
     }
 
@@ -184,91 +175,15 @@ class EditableTable extends Component {
         }
     }
 
-    cancel(key) {
-        const {isNew, data} = this.state;
-        if (isNew === true) {
-            const index = data.findIndex(item => key === item.key);
-            data.splice(index, 1);
-            this.setState({
-                isNew: false,
-                data: data,
-                editingKey: ''
-            })
-        } else {
-            this.setState({
-                editingKey: ''
-            })
-        }
-    }
-
-    handleDelete = (key) => {
-        const {data, deviceIds} = this.state;
+    cancel() {
         this.setState({
-            isLoading: true
-        });
-        const index = data.findIndex(item => key === item.key);
-        const item = data[index];
-        const deleteKey = item.deviceId;
-        const token = window.sessionStorage.getItem('token');
-        const url = 'http://47.92.206.44:80/api/device/' + deleteKey;
-        const opts = {
-            method: 'DELETE',
-            body: JSON.stringify(deleteKey),
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'authorization': 'Bearer ' + token
-            }
-        };
-        fetch(url, opts)
-            .then(response => response.status)
-            .then(() => {
-                message.success('删除设备成功');
-                const deviceIdIndex = deviceIds.indexOf(deleteKey);
-                deviceIds.splice(deviceIdIndex, 1);
-                this.setState({
-                    isLoading: false,
-                    deviceIds: deviceIds,
-                    data: data.filter(item => item.key !== key)
-                })
-            })
-            .catch(() => {
-                message.error('删除失败,请重新操作');
-                this.setState({
-                    isLoading: false
-                })
-            });
-    };
-
-    handleAdd = () => {
-        const {data, count, editingKey} = this.state;
-
-        if (editingKey) {
-            return false;
-        }
-        const newData = {
-            key: count,
-            deviceId: '',
-            rainId: '',
-            location: '',
-            description: ''
-        };
-
-        this.setState({
-            editingKey: count,
-            isNew: true,
-            count: count + 1,
-            data: [newData, ...data]
+            editingKey: ''
         })
-    };
+    }
 
     save(form, key) {
         form.validateFields((error, row) => {
-            if (error) {
-                return;
-            }
-            const deviceIdReg = new RegExp(/^([1-9][0-9]{7})$/);
-            const {data, isNew, deviceIds, userNames} = this.state;
+            const {data, rainIds} = this.state;
             const index = data.findIndex(item => key === item.key);
             const item = data[index];
             const newItem = {...item, ...row};
@@ -276,21 +191,14 @@ class EditableTable extends Component {
                 username: newItem.username,
                 deviceId: newItem.deviceId,
                 location: newItem.location,
+                rainId: newItem.rainId,
                 description: newItem.description
             };
-            if (userNames.indexOf(saveItem.username) === -1) {
-                message.warning('此用户名不存在，请重新指定用户');
+            const rainId = saveItem.rainId;
+            if (rainId !== "" && rainIds.indexOf(rainId) === -1) {
+                message.warning('此雨量设备不存在');
                 return false;
             }
-            if (!deviceIdReg.test(saveItem.deviceId)) {
-                message.warning('请输入8位正整数');
-                return false;
-            }
-            if (deviceIds.indexOf(saveItem.deviceId) > -1 && isNew) {
-                message.warning('此控制器已经卖出，请重新选择控制器');
-                return false;
-            }
-
             const token = window.sessionStorage.getItem('token');
             const url = 'http://47.92.206.44:80/api/device/' + newItem.deviceId;
             const opts = {
@@ -302,8 +210,6 @@ class EditableTable extends Component {
                     'authorization': 'Bearer ' + token
                 }
             };
-
-
             this.setState({
                 isLoading: true
             });
@@ -312,34 +218,22 @@ class EditableTable extends Component {
                 .then(() => {
                     message.success('添加成功');
                     data.splice(index, 1, newItem);
-                    if (isNew) {
-                        deviceIds.push(newItem.deviceId);
-                    }
                     this.setState({
                         data: data,
                         isLoading: false,
-                        deviceIds: deviceIds,
-                        isNew: false,
                         editingKey: ''
                     })
                 })
                 .catch(() => {
                     message.error('添加失败,请重新保存');
-                    if (isNew) {
-                        data.splice(index, 1);
-                        this.setState({
-                            data: data,
-                            isNew: false,
-                            isLoading: false,
-                            editingKey: ''
-                        })
-                    }
+                    this.setState({
+                        isLoading: false
+                    })
                 });
         })
     };
 
     componentDidMount() {
-
         const token = window.sessionStorage.getItem('token');
         const urlGetData = 'http://47.92.206.44:80/api/device';
         const urlGetUser = 'http://47.92.206.44:80/api/raininfo';
@@ -352,11 +246,6 @@ class EditableTable extends Component {
             }
         };
 
-        const timeOutPromise = new Promise((resolve, reject) => {
-            setTimeout(function () {
-                reject('TimeOut!')
-            }, 20000)
-        });
         const fetchGetData = new Promise((resolve, reject) => {
             fetch(urlGetData, options)
                 .then(response => response.json())
@@ -369,19 +258,13 @@ class EditableTable extends Component {
                 .then(responseText => resolve(responseText))
                 .catch(error => reject(error))
         });
-        const getData = Promise.all([fetchGetData, fetchGetRainIDData])
-            .then(result => Promise.resolve(result))
-            .catch(error => Promise.reject(error));
-        Promise.race([timeOutPromise, getData])
+        Promise.all([fetchGetData, fetchGetRainIDData])
             .then(result => {
-                result[0].map((item, index)=> item.key = index);
-                const rainIds = result[1].map(item => item.raindId);
-                const deviceIds = result[0].map(item => item.deviceId);
+                result[0].map((item, index) => item.key = index);
+                const rainIds = result[1].map(item => item.rainId);
                 this.setState({
                     data: result[0],
-                    count: result[0].length,
                     rainIds: rainIds,
-                    deviceIds: deviceIds,
                     isLoading: false
                 })
             })
@@ -394,7 +277,7 @@ class EditableTable extends Component {
     }
 
     render() {
-        const {isNew, rainIds} = this.state;
+        const {rainIds} = this.state;
         const components = {
             body: {
                 row: EditableFormRow,
@@ -403,12 +286,6 @@ class EditableTable extends Component {
         };
         const columns = this.columns.map((col) => {
             if (!col.editable) {
-                return col;
-            }
-            if (col.dataIndex === 'deviceId' && isNew === false) {
-                return col;
-            }
-            if (col.dataIndex === 'username' && isNew === false) {
                 return col;
             }
             return {
@@ -425,20 +302,15 @@ class EditableTable extends Component {
         });
 
         return (
-            <div>
-                <Button onClick={this.handleAdd} type="primary" className='add-row-button'>
-                    <Icon type="plus-circle"/>新增设备
-                </Button>
-                <Spin spinning={this.state.isLoading}>
-                    <Table
-                        components={components}
-                        rowClassName='editable-row'
-                        bordered
-                        dataSource={this.state.data}
-                        columns={columns}
-                    />
-                </Spin>
-            </div>
+            <Spin spinning={this.state.isLoading}>
+                <Table
+                    components={components}
+                    rowClassName='editable-row'
+                    bordered
+                    dataSource={this.state.data}
+                    columns={columns}
+                />
+            </Spin>
         )
     }
 }

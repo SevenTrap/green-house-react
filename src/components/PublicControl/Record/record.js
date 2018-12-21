@@ -1,17 +1,19 @@
 import React, {Component} from 'react';
-import {List, Row, Col, Button, message, AutoComplete, Drawer, Spin, Input, Icon, Form, Popconfirm} from 'antd';
+import {List, Row, Col, Button, message, Drawer, Spin, Input, Icon, Form, Popconfirm} from 'antd';
 import moment from 'moment';
+import {sortBy} from 'lodash';
+
+const SORTS = {
+    "DATETIME": list => sortBy(list, 'dateTime').reverse(),
+};
 
 class Index extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            count: 3,
             initLoading: true,
             loading: false,
             drawerVisible: false,
-            deviceIds: [],
-            newDeviceIds: [],
             data: [],
             list: []
         }
@@ -27,21 +29,20 @@ class Index extends Component {
             drawerVisible: false
         })
     };
-    handleDeviceIdSearch = (value) => {
-        const {deviceIds} = this.state;
-        const newDeviceId = deviceIds.filter(item => (item.indexOf(value) > -1) ? item : null);
-        this.setState({
-            newDeviceIds: newDeviceId
-        })
-    };
     handlePush = () => {
         this.props.form.validateFields((error, values) => {
             if (!error) {
+                const username = window.sessionStorage.getItem('Username');
+                let newItem = {
+                    targetId: username,
+                    subject: values.subject,
+                    description: values.description
+                };
                 const url = 'http://47.92.206.44:80/api/userlog';
                 const token = window.sessionStorage.getItem('token');
                 const opts = {
                     method: 'POST',
-                    body: JSON.stringify(values),
+                    body: JSON.stringify(newItem),
                     headers: {
                         'Accept': 'application/json',
                         'Content-Type': 'application/json',
@@ -94,7 +95,7 @@ class Index extends Component {
             });
             return false;
         }
-        const newData = data.filter(item => (item.targetid.indexOf(value) > -1) ? item : null);
+        const newData = data.filter(item => (item.subject.indexOf(value) > -1) ? item : null);
         this.setState({
             list: newData
         })
@@ -103,7 +104,6 @@ class Index extends Component {
     getData = () => {
         const token = window.sessionStorage.getItem('token');
         const urlData = `http://47.92.206.44:80/api/userlog`;
-        const urlDeviceId = `http://47.92.206.44:80/api/greenhouse`;
         const options = {
             method: 'GET',
             headers: {
@@ -112,29 +112,14 @@ class Index extends Component {
                 'authorization': 'Bearer ' + token
             }
         };
-        const getData = new Promise((resolve, reject) => {
-            fetch(urlData, options)
-                .then(response => response.json())
-                .then(res => resolve(res))
-                .catch(error => reject(error))
-        });
-        const getDeviceId = new Promise((resolve, reject) => {
-            fetch(urlDeviceId, options)
-                .then(response => response.json())
-                .then(res => resolve(res))
-                .catch(error => reject(error))
-        });
-        Promise.all([getData, getDeviceId])
+
+        fetch(urlData, options)
+            .then(response => response.json())
             .then(result => {
-                console.log(result);
-                result[0].map((item, index) => item.key = index);
-                const deviceIds = result[1].map(item => item.name);
+                result.map((item, index) => item.key = index);
                 this.setState({
-                    deviceIds: deviceIds,
-                    newDeviceIds: deviceIds,
-                    data: result[0],
-                    list: result[0],
-                    count: result[0].length,
+                    data: result,
+                    list: result,
                     initLoading: false
                 })
             })
@@ -143,7 +128,7 @@ class Index extends Component {
                 this.setState({
                     initLoading: false
                 })
-            });
+            })
     };
 
     componentDidMount() {
@@ -151,8 +136,10 @@ class Index extends Component {
     }
 
     render() {
-        const {list, initLoading, drawerVisible, newDeviceIds} = this.state;
-        const { getFieldDecorator } = this.props.form;
+        const {list, initLoading, drawerVisible} = this.state;
+        console.log(list);
+        const sortList = SORTS['DATETIME'](list);
+        const {getFieldDecorator} = this.props.form;
         return (
             <div>
                 <Drawer
@@ -169,28 +156,13 @@ class Index extends Component {
                     <Form layout='vertical' hideRequiredMark>
                         <Row gutter={16}>
                             <Col span={12}>
-                                <Form.Item label="标题">
+                                <Form.Item label="主题">
                                     {getFieldDecorator('subject', {
-                                        rules: [{ required: true, message: '请输入标题' }],
-                                    })(<Input placeholder="请输入标题" />)}
+                                        rules: [{required: true, message: '请输入主题'}],
+                                    })(<Input placeholder="请输入主题"/>)}
                                 </Form.Item>
                             </Col>
                         </Row>
-                        <Row gutter={16}>
-                            <Col span={12}>
-                                <Form.Item label="温室名称">
-                                    {getFieldDecorator('targetid', {
-                                        rules: [{ required: true, message: '请选择温室名称' }],
-                                    })(<AutoComplete
-                                        dataSource={newDeviceIds}
-                                        style={{width: '100%'}}
-                                        onSearch={this.handleDeviceIdSearch}
-                                        placeholder='请选择温室名称'
-                                    />)}
-                                </Form.Item>
-                            </Col>
-                        </Row>
-
                         <Row gutter={16}>
                             <Col span={24}>
                                 <Form.Item label="详情">
@@ -201,7 +173,7 @@ class Index extends Component {
                                                 message: '请描述操作详情',
                                             },
                                         ],
-                                    })(<Input.TextArea rows={4} placeholder="请描述操作详情" />)}
+                                    })(<Input.TextArea rows={4} placeholder="请描述操作详情"/>)}
                                 </Form.Item>
                             </Col>
                         </Row>
@@ -218,7 +190,7 @@ class Index extends Component {
                             textAlign: 'right',
                         }}
                     >
-                        <Button onClick={this.onClose} style={{ marginRight: 8 }}>
+                        <Button onClick={this.onClose} style={{marginRight: 8}}>
                             取消
                         </Button>
                         <Button onClick={this.handlePush} type="primary">
@@ -229,7 +201,7 @@ class Index extends Component {
                 <Row gutter={24}>
                     <Col span={6}>
                         <Input.Search
-                            addonBefore='温室名称'
+                            addonBefore='主题'
                             enterButton="搜索"
                             onSearch={this.handleSearch}
                         />
@@ -253,11 +225,11 @@ class Index extends Component {
                                 },
                                 pageSize: 10
                             }}
-                            dataSource={list}
+                            dataSource={sortList}
                             renderItem={item => (
                                 <List.Item
                                     key={item.key}
-                                    actions={[moment(item.dateTime).format('YYYY-MM-DD'), `温室名称：${item.targetid}`]}
+                                    actions={[`记录时间：${moment(item.dateTime).format('YYYY-MM-DD HH:mm:ss')}`]}
                                     extra={
                                         <Popconfirm
                                             title="确认删除?"
@@ -267,7 +239,7 @@ class Index extends Component {
                                         >
                                             <Button type='danger'>删除</Button>
                                         </Popconfirm>
-                                        }
+                                    }
                                 >
                                     <List.Item.Meta
                                         title={item.subject}
@@ -283,5 +255,6 @@ class Index extends Component {
         )
     }
 }
+
 const Record = Form.create()(Index);
 export default Record;

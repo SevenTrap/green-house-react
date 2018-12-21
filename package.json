@@ -27,6 +27,7 @@
   "devDependencies": {
     "antd": "^3.10.0",
     "axios": "^0.18.0",
+    "lodash": "^4.17.11",
     "moment": "^2.23.0",
     "prop-types": "^15.6.2",
     "react-app-rewire-less": "^2.1.3",

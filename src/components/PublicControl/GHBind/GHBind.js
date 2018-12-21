@@ -327,7 +327,6 @@ class EditableTable extends Component {
             const item = data[index];
             const newItem = {...item, ...row};
             const greenHouseId = greenHouseNameToId[newItem.greenHouseName];
-            console.log(newItem, greenHouseId, key);
             if (isNew) {
                 this.handlePushNewItem(newItem, greenHouseId, key, index);
             } else {

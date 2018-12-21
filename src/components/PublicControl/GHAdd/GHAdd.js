@@ -178,7 +178,11 @@ class EditableTable extends Component {
         this.setState({
             isLoading: true
         });
-        const {data, greenHouseNames} = this.state;
+        const {data, greenHouseNames, editingKey} = this.state;
+        if (!editingKey === "") {
+            message.warning('处于编辑中');
+            return false;
+        }
         const token = window.sessionStorage.getItem('token');
         const index = data.findIndex(item => key === item.key);
         const item = data[index];
@@ -218,7 +222,7 @@ class EditableTable extends Component {
     handleAdd = () => {
         const {data, count, editingKey} = this.state;
 
-        if (editingKey) {
+        if (!editingKey === "") {
             return false;
         }
 
@@ -242,10 +246,6 @@ class EditableTable extends Component {
 
     save(form, key) {
         form.validateFields((error, row) => {
-            if (error) {
-                return false;
-            }
-
             const {data, isNew, Username, greenHouseNames} = this.state;
             const index = data.findIndex(item => key === item.key);
             const item = data[index];

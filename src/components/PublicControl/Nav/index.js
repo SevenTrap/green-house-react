@@ -46,7 +46,7 @@ class Index extends Component {
                             <Link to="/public/GHRain"><Icon type="link"/>雨量绑定</Link>
                         </Menu.Item>
                         <Menu.Item key="record">
-                            <Link to="/public/Record"><Icon type="link"/>操作记录</Link>
+                            <Link to="/public/Record"><Icon type="file-text"/>操作记录</Link>
                         </Menu.Item>
                         <Menu.Item key="PwdChange">
                             <Link to="/public/PwdChange"><Icon type="setting"/>修改密码</Link>
