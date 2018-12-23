@@ -279,15 +279,15 @@ class EditableTable extends Component {
                 description: newItem.description
             };
             if (userNames.indexOf(saveItem.username) === -1) {
-                message.warning('此用户名不存在，请重新指定用户');
+                message.warning('此归属用户名不存在，请重新指定用户');
                 return false;
             }
             if (!deviceIdReg.test(saveItem.deviceId)) {
-                message.warning('请输入8位正整数');
+                message.warning('请输入正确的"控制器ID" 8位正整数');
                 return false;
             }
             if (deviceIds.indexOf(saveItem.deviceId) > -1 && isNew) {
-                message.warning('此控制器已经卖出，请重新选择控制器');
+                message.warning('此控制器ID已经卖出，请重新选择控制器');
                 return false;
             }
 
@@ -326,12 +326,8 @@ class EditableTable extends Component {
                 .catch(() => {
                     message.error('添加失败,请重新保存');
                     if (isNew) {
-                        data.splice(index, 1);
                         this.setState({
-                            data: data,
-                            isNew: false,
                             isLoading: false,
-                            editingKey: ''
                         })
                     }
                 });
@@ -375,7 +371,13 @@ class EditableTable extends Component {
         Promise.race([timeOutPromise, getData])
             .then(result => {
                 result[0].map((item, index)=> item.key = index);
-                const userNames = result[1].map(item => item.username);
+                let userNames = [];
+                for (let i = 0; i < result[1].length; i++) {
+                    let item = result[1][i];
+                    if (item.role !== "Administrator") {
+                        userNames.push(item.username);
+                    }
+                }
                 const deviceIds = result[0].map(item => item.deviceId);
                 this.setState({
                     data: result[0],

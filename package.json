@@ -27,6 +27,7 @@
   "devDependencies": {
     "antd": "^3.10.0",
     "axios": "^0.18.0",
+    "echarts": "^4.2.0-rc.2",
     "lodash": "^4.17.11",
     "moment": "^2.23.0",
     "prop-types": "^15.6.2",

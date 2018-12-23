@@ -1,8 +1,7 @@
 import React, {Component} from 'react';
-import {Table, Input, Button, Popconfirm, Form, Select, Spin, AutoComplete, message, Icon} from 'antd';
+import {Table, Input, Button, Popconfirm, Form, Spin, AutoComplete, message, Icon} from 'antd';
 
 const FormItem = Form.Item;
-const Option = Select.Option;
 const EditableContext = React.createContext();
 
 const EditableRow = ({form, index, ...props}) => (
@@ -89,7 +88,7 @@ class EditableTable extends Component {
                 title: '雨量安装位置',
                 dataIndex: 'location',
                 editable: true,
-                isRequired: true,
+                isRequired: false,
                 width: '20%'
             }, {
                 title: '详情',
@@ -196,9 +195,14 @@ class EditableTable extends Component {
     }
 
     handleDelete = (key) => {
-        const {data, rainIds} = this.state;
+        const {data, rainIds, userNames, editingKey} = this.state;
+        if (editingKey !== "") {
+            message.warning('存在编辑项');
+            return false;
+        }
         const index = data.findIndex(item => key === item.key);
         const item = data[index].rainId;
+        const deleteUserName = data[index].username;
         const token = window.sessionStorage.getItem('token');
         const url = 'http://47.92.206.44:80/api/raininfo/' + item;
         const opts = {
@@ -219,9 +223,12 @@ class EditableTable extends Component {
                 message.success('删除雨量成功');
                 const rainIdsIndex = rainIds.indexOf(item);
                 rainIds.splice(rainIdsIndex, 1);
+                console.log(deleteUserName);
+                userNames.push(deleteUserName);
                 this.setState({
                     isLoading: false,
                     rainIds: rainIds,
+                    userNames: userNames,
                     data: data.filter(item => item.key !== key)
                 })
             })
@@ -234,8 +241,13 @@ class EditableTable extends Component {
     };
 
     handleAdd = () => {
-        const {data, count, editingKey} = this.state;
-        if (editingKey) {
+        const {data, count, userNames, editingKey} = this.state;
+        if (editingKey !== "") {
+            message.warning('存在编辑项');
+            return false;
+        }
+        if (userNames.length === 0) {
+            message.warning('所有用户均有雨量设备');
             return false;
         }
         const newData = {
@@ -257,9 +269,6 @@ class EditableTable extends Component {
     //新增项目保存时，保存失败需要将其删除
     save(form, key) {
         form.validateFields((error, row) => {
-            if (error) {
-                return false;
-            }
             const rainIdReg = new RegExp(/^([1-9][0-9]{7})$/);
             const {data, isNew, rainIds, userNames} = this.state;
             const index = data.findIndex(item => key === item.key);
@@ -271,7 +280,8 @@ class EditableTable extends Component {
                 description: newItem.description,
                 username: newItem.username,
             };
-            if (userNames.indexOf(saveItem.username) === -1) {
+            console.log(saveItem);
+            if (userNames.indexOf(saveItem.username) === -1 && isNew) {
                 message.warning('此用户名不存在，请重新指定用户');
                 return false;
             }
@@ -305,11 +315,14 @@ class EditableTable extends Component {
                     data.splice(index, 1, newItem);
                     if (isNew) {
                         rainIds.push(newItem.rainId);
+                        let deleteIndex = userNames.findIndex(item => item === saveItem.username);
+                        userNames.splice(deleteIndex, 1);
                     }
                     this.setState({
                         isLoading: false,
                         data: data,
                         isNew: false,
+                        userNames: userNames,
                         rainIds: rainIds,
                         editingKey: ''
                     })
@@ -317,12 +330,8 @@ class EditableTable extends Component {
                 .catch(() => {
                     message.error('添加失败,请重新保存');
                     if (isNew) {
-                        data.splice(index, 1);
                         this.setState({
-                            data: data,
-                            isLoading: false,
-                            isNew: false,
-                            editingKey: ''
+                            isLoading: false
                         })
                     }
                 });
@@ -356,9 +365,18 @@ class EditableTable extends Component {
         });
         Promise.all([getRainInfo, getUsers])
             .then(result => {
+                console.log(result);
                 result[0].map((item, index) => item.key = index);
                 let rainIds = result[0].map(item => item.rainId);
-                let userNames = result[1].map(item => item.username);
+                let rainUser = result[0].map(item => item.username);
+
+                let userNames = [];
+                for (let i = 0; i < result[1].length; i++) {
+                    let item = result[1][i];
+                    if (item.role !== "Administrator" && rainUser.indexOf(item.username) === -1) {
+                        userNames.push(item.username);
+                    }
+                }
                 this.setState({
                     isLoading: false,
                     rainIds: rainIds,
@@ -377,6 +395,7 @@ class EditableTable extends Component {
 
     render() {
         const {isNew, userNames} = this.state;
+        console.log(userNames);
         const components = {
             body: {
                 row: EditableFormRow,

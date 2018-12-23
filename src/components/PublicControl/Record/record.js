@@ -207,7 +207,7 @@ class Index extends Component {
                         />
                     </Col>
                     <Col span={6} offset={12}>
-                        <Button onClick={this.handleAdd} style={{float: 'right'}}>
+                        <Button type="primary" onClick={this.handleAdd} style={{float: 'right'}}>
                             <Icon type='plus'/>
                             添加记录
                         </Button>

@@ -48,6 +48,9 @@ class Index extends Component {
                         <Menu.Item key="record">
                             <Link to="/public/Record"><Icon type="file-text"/>操作记录</Link>
                         </Menu.Item>
+                        <Menu.Item key="chart">
+                            <Link to="/public/chart"><Icon type="file-text"/>历史记录</Link>
+                        </Menu.Item>
                         <Menu.Item key="PwdChange">
                             <Link to="/public/PwdChange"><Icon type="setting"/>修改密码</Link>
                         </Menu.Item>

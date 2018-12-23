@@ -188,10 +188,11 @@ class EditableTable extends Component {
 
     //删除用户时，会删除用户底下所有信息，包括所有设备以及大棚信息
     handleDelete = (key) => {
-        this.setState({
-            isLoading: true
-        });
-        const {data, userNames} = this.state;
+        const {data, userNames, editingKey} = this.state;
+        if (editingKey !== "") {
+            message.warning('存在编辑项');
+            return false;
+        }
         const index = data.findIndex(item => key === item.key);
         const item = data[index].username;
         const token = window.sessionStorage.getItem('token');
@@ -205,6 +206,9 @@ class EditableTable extends Component {
                 'authorization': 'Bearer ' + token
             }
         };
+        this.setState({
+            isLoading: true
+        });
         fetch(url, opts)
             .then(response => response.status)
             .then(() => {
@@ -227,7 +231,7 @@ class EditableTable extends Component {
 
     handleAdd = () => {
         const {data, count, editingKey} = this.state;
-        if (editingKey) {
+        if (editingKey !== "") {
             return false;
         }
         const newData = {
@@ -249,9 +253,6 @@ class EditableTable extends Component {
     //新增项目保存时，保存失败需要将其删除
     save(form, key) {
         form.validateFields((error, row) => {
-            if (error) {
-                return false;
-            }
             const passwordReg = new RegExp(/^(\w){6,10}$/);
             const usernameReg = new RegExp(/^\s+/);
             const {data, isNew, userNames} = this.state;
@@ -263,8 +264,7 @@ class EditableTable extends Component {
                 password: newItem.password,
                 role: newItem.role,
                 phone: newItem.phone,
-                emailAddress: newItem.emailAddress,
-                description: newItem.description
+                emailAddress: newItem.emailAddress
             };
             if (!usernameReg.test(saveItem.username)) {
                 message.warning('用户名不能包含空格');
@@ -316,12 +316,8 @@ class EditableTable extends Component {
                 .catch(() => {
                     message.error('添加失败,请重新保存');
                     if (isNew) {
-                        data.splice(index, 1);
                         this.setState({
-                            data: data,
-                            isLoading: false,
-                            isNew: false,
-                            editingKey: ''
+                            isLoading: false
                         })
                     }
                 });
@@ -372,6 +368,9 @@ class EditableTable extends Component {
                 return col;
             }
             if (col.dataIndex === 'username' && this.state.isNew === false) {
+                return col;
+            }
+            if (col.dataIndex === 'role' && this.state.isNew === false) {
                 return col;
             }
             if (col.dataIndex === 'password') {

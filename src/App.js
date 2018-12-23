@@ -20,6 +20,7 @@ import GHControl from './components/PublicControl/GHControl';
 import GHSingle from './components/PublicControl/GHSingle';
 import PwdChange from './components/PublicControl/PwdChange';
 import Record from './components/PublicControl/Record';
+import GHCHart from './components/PublicControl/GHCHart';
 
 class App extends Component {
     render() {
@@ -41,6 +42,7 @@ class App extends Component {
                     <PrivatePublicRoute path="/public/GHSingle" component={GHSingle}/>
                     <PrivatePublicRoute path="/public/PwdChange" component={PwdChange}/>
                     <PrivatePublicRoute path="/public/Record" component={Record}/>
+                    <PrivatePublicRoute path="/public/chart" component={GHCHart}/>
                     <Route component={PublicLogin}/>
                 </Switch>
             </BrowserRouter>

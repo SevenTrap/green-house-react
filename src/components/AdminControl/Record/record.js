@@ -1,6 +1,10 @@
 import React, {Component} from 'react';
 import {List, Row, Col, Button, message, AutoComplete, Drawer, Spin, Input, Icon, Form, Popconfirm} from 'antd';
 import moment from 'moment';
+import {sortBy} from 'lodash';
+const SORTS = {
+    "DATETIME": list => sortBy(list, 'dateTime').reverse(),
+};
 
 class Index extends Component {
     constructor(props) {
@@ -150,12 +154,13 @@ class Index extends Component {
 
     render() {
         const {list, initLoading, drawerVisible, newDeviceIds} = this.state;
+        const sortList = SORTS['DATETIME'](list);
         const { getFieldDecorator } = this.props.form;
         return (
             <div>
                 <Drawer
                     title='新增维修记录'
-                    width={400}
+                    width={600}
                     onClose={this.onClose}
                     visible={drawerVisible}
                     style={{
@@ -251,11 +256,11 @@ class Index extends Component {
                                 },
                                 pageSize: 10
                             }}
-                            dataSource={list}
+                            dataSource={sortList}
                             renderItem={item => (
                                 <List.Item
                                     key={item.key}
-                                    actions={[moment(item.dateTime).format('YYYY-MM-DD'), `控制器ID：${item.targetid}`]}
+                                    actions={[moment(item.dateTime).format('YYYY-MM-DD HH:mm:ss'), `控制器ID：${item.targetid}`]}
                                     extra={
                                         <Popconfirm
                                             title="确认删除?"
