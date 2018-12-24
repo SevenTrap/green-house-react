@@ -88,8 +88,8 @@ class Index extends Component {
                 const hum2 = result.map(item => Number(item.hum2));
                 const temp1 = result.map(item => Number(item.temp1 / 10));
                 const temp2 = result.map(item => Number(item.temp2 / 10));
-                const time = result.map(item => `${item.insert_time[0]}${item.insert_time[1]}-${item.insert_time[2]}${item.insert_time[3]}-${item.insert_time[4]}${item.insert_time[5]} ${item.insert_time[6]}${item.insert_time[7]}:${item.insert_time[8]}${item.insert_time[9]}:${item.insert_time[10]}${item.insert_time[11]}`);
-                console.log(hum1, hum2, temp1, temp2, time);
+                const time = result.map(item => `${item.insert_time[0]}${item.insert_time[1]}${item.insert_time[2]}${item.insert_time[3]}-${item.insert_time[4]}${item.insert_time[5]}-${item.insert_time[6]}${item.insert_time[7]} ${item.insert_time[8]}${item.insert_time[9]}:${item.insert_time[10]}${item.insert_time[11]}:${item.insert_time[12]}${item.insert_time[13]}`);
+                // console.log(hum1, hum2, temp1, temp2, time);
                 this.setState({
                     humi1: hum1,
                     humi2: hum2,

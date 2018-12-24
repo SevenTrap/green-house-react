@@ -621,22 +621,23 @@ class Index extends Component {
         if (value === "0") {
             actionItem = [{
                 deviceId: deviceId,
-                commandtype: '15',
-                action: `1 0000 0`
+                commandtype: '10',
+                action: `1 0900 0`
             }];
         }
         else {
+            if (!valueReg.test(clock)) {
+                message.error('请输入正确的参数');
+                return false;
+            }
             clockValue = clock;
             actionItem = [{
                 deviceId: deviceId,
-                commandtype: '15',
+                commandtype: '10',
                 action: `1 ${clock} 1`
             }];
         }
-        if (!valueReg.test(clock)) {
-            message.error('请输入正确的参数');
-            return false;
-        }
+
         console.log(actionItem);
         const token = window.sessionStorage.getItem('token');
         const urlAction = 'http://47.92.206.44:80/api/action';
@@ -746,7 +747,7 @@ class Index extends Component {
         let greenHousePos1 = (pos1.length === 0) ? null : pos1[0].greenHousePos;
         let greenHousePos2 = (pos2.length === 0) ? null : pos2[0].greenHousePos;
         let greenHousePos3 = (pos3.length === 0) ? null : pos3[0].greenHousePos;
-        // console.log(greenHousePos0, greenHousePos1, greenHousePos2, greenHousePos3);
+        console.log(greenHousePos0, greenHousePos1, greenHousePos2, greenHousePos3);
 
         let temp1 = deviceIdStatus.temp1;
         let temp2 = deviceIdStatus.temp2;
@@ -934,7 +935,7 @@ class Index extends Component {
                     }
                     {greenHousePos1 ?
                         <Col span={12}>
-                            <Card title={`卷膜机2 | ${greenHousePos2}`}>
+                            <Card title={`卷膜机2 | ${greenHousePos1}`}>
                                 <Card.Grid style={{width: '100%', textAlign: 'center'}}>
                                     <Radio.Group value={String(motor_2_act)}
                                                  onChange={this.handleMotor2Control}>
