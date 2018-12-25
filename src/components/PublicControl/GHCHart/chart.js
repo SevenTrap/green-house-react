@@ -10,6 +10,8 @@ import 'moment/locale/zh-cn';
 
 moment.locale('zh-cn');
 
+const {RangePicker} = DatePicker;
+
 class Index extends Component {
     constructor(props) {
         super(props);
@@ -20,22 +22,18 @@ class Index extends Component {
             temp2: [],
             time: [],
             initLoading: true,
-            startTime: '',
-            endTime: '',
+            startValue: null,
+            endValue: null,
             deviceId: '',
             deviceIds: [],
             newDeviceIds: []
         }
     }
 
-    handleStartTime = (date, dateString) => {
+    onChange = (date, dateString) => {
         this.setState({
-            startTime: dateString
-        })
-    };
-    handleEndTime = (date, dateString) => {
-        this.setState({
-            endTime: dateString
+            startValue: dateString[0],
+            endValue: dateString[1]
         })
     };
     handleDeviceIdSearch = (value) => {
@@ -52,7 +50,16 @@ class Index extends Component {
     };
 
     getData = () => {
-        const {deviceId, startTime, endTime} = this.state;
+        const {deviceId, startValue, endValue} = this.state;
+        let time = (new Date()).getTime();
+        let startTime, endTime;
+        if (startValue === null || endValue === null) {
+            startTime = moment(time).format('YYYY-MM-DD');
+            endTime = moment(time).format('YYYY-MM-DD');
+        } else {
+            startTime = startValue;
+            endTime = endValue;
+        }
         const token = window.sessionStorage.getItem('token');
         const urlData = `http://47.92.206.44:80/api/history`;
         const param = {
@@ -89,7 +96,6 @@ class Index extends Component {
                 const temp1 = result.map(item => Number(item.temp1 / 10));
                 const temp2 = result.map(item => Number(item.temp2 / 10));
                 const time = result.map(item => `${item.insert_time[0]}${item.insert_time[1]}${item.insert_time[2]}${item.insert_time[3]}-${item.insert_time[4]}${item.insert_time[5]}-${item.insert_time[6]}${item.insert_time[7]} ${item.insert_time[8]}${item.insert_time[9]}:${item.insert_time[10]}${item.insert_time[11]}:${item.insert_time[12]}${item.insert_time[13]}`);
-                // console.log(hum1, hum2, temp1, temp2, time);
                 this.setState({
                     humi1: hum1,
                     humi2: hum2,
@@ -111,15 +117,14 @@ class Index extends Component {
     draw = () => {
         const {humi1, humi2, temp1, temp2, time} = this.state;
         const myChart = echarts.init(document.getElementById('main'));
+        const colors = ['#ffa39e', '#f5222d', '#91d5ff', '#1890ff'];
         myChart.setOption({
+            color: colors,
             tooltip: {
-                trigger: 'axis',
-                axisPointer: {
-                    type: 'cross'
-                }
+                trigger: 'axis'
             },
             legend: {
-                data: ['空气湿度1', '空气湿度2', '空气温度1', '空气温度2']
+                data: ['空气温度1', '空气温度2', '空气湿度1', '空气湿度2']
             },
             xAxis: {
                 type: 'category',
@@ -134,7 +139,7 @@ class Index extends Component {
                     position: 'right',
                     axisLine: {
                         lineStyle: {
-                            color: 'red'
+                            color: colors[0]
                         }
                     },
                     axisLabel: {
@@ -149,7 +154,7 @@ class Index extends Component {
                     position: 'right',
                     axisLine: {
                         lineStyle: {
-                            color: 'red'
+                            color: colors[1]
                         }
                     },
                     axisLabel: {
@@ -158,13 +163,13 @@ class Index extends Component {
                 },{
                     type: 'value',
                     name: '空气温度1',
-                    min: -20,
-                    max: 80,
+                    min: 0,
+                    max: 100,
                     offset: 80,
                     position: 'left',
                     axisLine: {
                         lineStyle: {
-                            color: 'blue'
+                            color: colors[2]
                         }
                     },
                     axisLabel: {
@@ -173,12 +178,12 @@ class Index extends Component {
                 },{
                     type: 'value',
                     name: '空气温度2',
-                    min: -20,
-                    max: 80,
+                    min: 0,
+                    max: 100,
                     position: 'left',
                     axisLine: {
                         lineStyle: {
-                            color: 'blue'
+                            color: colors[3]
                         }
                     },
                     axisLabel: {
@@ -196,16 +201,19 @@ class Index extends Component {
                     name: '空气湿度2',
                     type: 'line',
                     smooth: true,
+                    yAxisIndex: 1,
                     data: humi2
                 }, {
                     name: '空气温度1',
                     type: 'line',
                     smooth: true,
+                    yAxisIndex: 2,
                     data: temp1
                 }, {
                     name: '空气温度2',
                     type: 'line',
                     smooth: true,
+                    yAxisIndex: 3,
                     data: temp2
                 }
             ]
@@ -213,8 +221,7 @@ class Index extends Component {
     };
 
     componentDidMount() {
-        let time = (new Date()).getTime();
-        time = moment(time).format('YYYY-MM-DD');
+
         const token = window.sessionStorage.getItem('token');
         const urlData = `http://47.92.206.44:80/api/device`;
         const options = {
@@ -239,9 +246,7 @@ class Index extends Component {
                 this.setState({
                     deviceId: deviceIds[0],
                     deviceIds: deviceIds,
-                    newDeviceIds: deviceIds,
-                    startTime: time,
-                    endTime: time
+                    newDeviceIds: deviceIds
                 });
                 this.getData();
             })
@@ -254,7 +259,7 @@ class Index extends Component {
     }
 
     render() {
-        const {endTime, startTime, newDeviceIds, deviceId, time, initLoading} = this.state;
+        const {newDeviceIds, deviceId, time, initLoading} = this.state;
         return (
             <div>
                 <Row gutter={24}>
@@ -273,16 +278,7 @@ class Index extends Component {
                         </Input.Group>
                     </Col>
                     <Col span={6}>
-                        <Input.Group compact>
-                            <Input style={{width: '30%', color: '#333'}} defaultValue="开始时间" disabled={true}/>
-                            <DatePicker onChange={this.handleStartTime} value={moment(startTime, 'YYYY-MM-DD')}/>
-                        </Input.Group>
-                    </Col>
-                    <Col span={6}>
-                        <Input.Group compact>
-                            <Input style={{width: '30%', color: '#333'}} defaultValue="结束时间" disabled={true}/>
-                            <DatePicker onChange={this.handleEndTime} value={moment(endTime, 'YYYY-MM-DD')}/>
-                        </Input.Group>
+                        <RangePicker placeholder={['开始日期', '结束日期']} onChange={this.onChange}/>
                     </Col>
                     <Col span={6}>
                         <Button onClick={this.getData} type='primary'>

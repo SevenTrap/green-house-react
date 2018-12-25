@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Table, Input, Button, Popconfirm, Form, Spin, AutoComplete, message, Icon} from 'antd';
+import {Table, Input, Button, Popconfirm, Form, Spin, Row, Col, AutoComplete, message, Icon} from 'antd';
 
 const FormItem = Form.Item;
 const EditableContext = React.createContext();
@@ -19,6 +19,7 @@ class EditableCell extends Component {
             userNames: this.props.userNames
         }
     }
+
     //判断输入框的类型
     getInput = () => {
         if (this.props.dataIndex === 'username') {
@@ -41,6 +42,7 @@ class EditableCell extends Component {
             userNames: newUserName
         })
     };
+
     render() {
         const {
             editing,
@@ -162,6 +164,7 @@ class EditableTable extends Component {
 
         this.state = {
             data: [],
+            list: [],
             userNames: [],
             deviceIds: [],
             editingKey: '',
@@ -239,7 +242,6 @@ class EditableTable extends Component {
                 })
             });
     };
-
     handleAdd = () => {
         const {data, count, editingKey} = this.state;
 
@@ -334,6 +336,20 @@ class EditableTable extends Component {
         })
     };
 
+    handleSearch = (value) => {
+        const {data} = this.state;
+        if (value === "") {
+            this.setState({
+                list: data
+            });
+            return false;
+        }
+        const newData = data.filter(item => (item.deviceId.indexOf(value) > -1) ? item : null);
+        this.setState({
+            list: newData
+        })
+    };
+
     componentDidMount() {
 
         const token = window.sessionStorage.getItem('token');
@@ -370,7 +386,7 @@ class EditableTable extends Component {
             .catch(error => Promise.reject(error));
         Promise.race([timeOutPromise, getData])
             .then(result => {
-                result[0].map((item, index)=> item.key = index);
+                result[0].map((item, index) => item.key = index);
                 let userNames = [];
                 for (let i = 0; i < result[1].length; i++) {
                     let item = result[1][i];
@@ -381,6 +397,7 @@ class EditableTable extends Component {
                 const deviceIds = result[0].map(item => item.deviceId);
                 this.setState({
                     data: result[0],
+                    list: result[0],
                     count: result[0].length,
                     userNames: userNames,
                     deviceIds: deviceIds,
@@ -396,7 +413,7 @@ class EditableTable extends Component {
     }
 
     render() {
-        const {isNew, userNames} = this.state;
+        const {isNew, userNames, list, isLoading} = this.state;
         const components = {
             body: {
                 row: EditableFormRow,
@@ -428,15 +445,27 @@ class EditableTable extends Component {
 
         return (
             <div>
-                <Button onClick={this.handleAdd} type="primary" className='add-row-button'>
-                    <Icon type="plus-circle"/>新增设备
-                </Button>
-                <Spin spinning={this.state.isLoading}>
+                <Row gutter={24}>
+                    <Col span={6}>
+                        <Input.Search
+                            addonBefore='控制器ID'
+                            enterButton="搜索"
+                            onSearch={this.handleSearch}
+                        />
+                    </Col>
+                    <Col span={6} offset={12}>
+                        <Button onClick={this.handleAdd} type="primary" style={{float: 'right'}}>
+                            <Icon type="plus-circle"/>新增设备
+                        </Button>
+                    </Col>
+                </Row>
+
+                <Spin spinning={isLoading}>
                     <Table
                         components={components}
                         rowClassName='editable-row'
                         bordered
-                        dataSource={this.state.data}
+                        dataSource={list}
                         columns={columns}
                     />
                 </Spin>
