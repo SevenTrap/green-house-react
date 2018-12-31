@@ -3,9 +3,9 @@ import {Card, Input, message, Row} from 'antd';
 
 class Index extends Component {
     handleMotorRange = (value) => {
-        const valueReg = new RegExp(/^[1-9][0-9]{0,2}$/);
+        const valueReg = new RegExp(/^[0-9]{3}$/);
         if (!valueReg.test(value)) {
-            message.error('请输入1~3位正整数');
+            message.error('请输入3位正整数');
             return false;
         }
         const {deviceIds} = this.props;
@@ -47,7 +47,7 @@ class Index extends Component {
                 </Row>
                 <Row gutter={24}>
                     <Input.Search style={{width: '80%'}}
-                                  placeholder='输入1～3位整数'
+                                  placeholder='输入3位整数'
                                   enterButton="提交"
                                   onSearch={this.handleMotorRange}/>
                 </Row>

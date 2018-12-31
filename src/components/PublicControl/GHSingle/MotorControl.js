@@ -56,7 +56,7 @@ class Index extends Component {
             })
     };
     handleMotor1Range = (value) => {
-        const valueReg =  new RegExp(/^[1-9][0-9]{0,2}$/);
+        const valueReg =  new RegExp(/^[0-9]{3}$/);
         if (!valueReg.test(value)) {
             message.warning('请输入正确的参数');
             return false;
@@ -155,7 +155,7 @@ class Index extends Component {
         })
     };
     handleMotor1OpenTime = () => {
-        const valueReg =  new RegExp(/^[1-9][0-9]{0,2}$/);
+        const valueReg =  new RegExp(/^[0-9]{3}$/);
         const {deviceIdStatus, motor1First, motor1Second} = this.state;
         const {deviceId} = this.props;
         if (!valueReg.test(motor1First) || !valueReg.test(motor1Second)) {
@@ -267,7 +267,7 @@ class Index extends Component {
             })
     };
     handleServer1Time = (value) => {
-        const valueReg =  new RegExp(/^[1-9][0-9]{0,2}$/);
+        const valueReg =  new RegExp(/^[0-9]{3}$/);
         if (!valueReg.test(value)) {
             message.warning('请输入正确的参数');
             return false;
@@ -350,7 +350,7 @@ class Index extends Component {
             })
     };
     handleMotor2Range = (value) => {
-        const valueReg =  new RegExp(/^[1-9][0-9]{0,2}$/);
+        const valueReg =  new RegExp(/^[0-9]{3}$/);
         if (!valueReg.test(value)) {
             message.warning('请输入正确的参数');
             return false;
@@ -449,7 +449,7 @@ class Index extends Component {
         })
     };
     handleMotor2OpenTime = () => {
-        const valueReg =  new RegExp(/^[1-9][0-9]{0,2}$/);
+        const valueReg =  new RegExp(/^[0-9]{3}$/);
         const {deviceIdStatus, motor2First, motor2Second} = this.state;
         const {deviceId} = this.props;
         if (!valueReg.test(motor2First) || !valueReg.test(motor2Second)) {
@@ -561,7 +561,7 @@ class Index extends Component {
             })
     };
     handleServer2Time = (value) => {
-        const valueReg =  new RegExp(/^[1-9][0-9]{0,2}$/);
+        const valueReg =  new RegExp(/^[0-9]{3}$/);
         if (!valueReg.test(value)) {
             message.warning('请输入正确的参数');
             return false;
@@ -667,7 +667,7 @@ class Index extends Component {
             })
     };
     handleTimeOut = (value) => {
-        const valueReg =  new RegExp(/^[1-9][0-9]{0,2}$/);
+        const valueReg =  new RegExp(/^[0-9]{3}$/);
         if (!valueReg.test(value)) {
             message.warning('请输入正确的参数');
             return false;
@@ -857,7 +857,7 @@ class Index extends Component {
                             </Row>
                             <Row gutter={24}>
                                 <Input.Search style={{width: '80%'}}
-                                              placeholder='输入1～3位整数'
+                                              placeholder='输入3位整数'
                                               enterButton="提交"
                                               onSearch={this.handleTimeOut}/>
                             </Row>
@@ -890,7 +890,7 @@ class Index extends Component {
                                     </Row>
                                     <Row gutter={24}>
                                         <Input.Search style={{width: '80%'}}
-                                                      placeholder='输入1～3位整数'
+                                                      placeholder='输入3位整数'
                                                       enterButton="提交"
                                                       onSearch={this.handleMotor1Range}/>
                                     </Row>
@@ -917,10 +917,10 @@ class Index extends Component {
                                     </Row>
                                     <Row gutter={24}>
                                         <Col span={10}>
-                                            <Input value={motor1First} placeholder="输入1～3位整数" onChange={this.handleMotor1First} addonBefore="首开"/>
+                                            <Input value={motor1First} placeholder="输入3位整数" onChange={this.handleMotor1First} addonBefore="首开"/>
                                         </Col>
                                         <Col span={10}>
-                                            <Input value={motor1Second} placeholder="输入1～3位整数" onChange={this.handleMotor1Second} addonBefore="再开"/>
+                                            <Input value={motor1Second} placeholder="输入3位整数" onChange={this.handleMotor1Second} addonBefore="再开"/>
                                         </Col>
                                         <Col span={4}>
                                             <Button onClick={this.handleMotor1OpenTime} type="primary">
@@ -950,7 +950,7 @@ class Index extends Component {
                                     </Row>
                                     <Row gutter={24}>
                                         <Input.Search style={{width: '80%'}}
-                                                      placeholder='输入1～3位整数'
+                                                      placeholder='输入3位整数'
                                                       enterButton="提交"
                                                       onSearch={this.handleMotor2Range}/>
                                     </Row>
@@ -977,10 +977,10 @@ class Index extends Component {
                                     </Row>
                                     <Row gutter={24}>
                                         <Col span={10}>
-                                            <Input value={motor2First} placeholder="输入1～3位整数" onChange={this.handleMotor2First} addonBefore="首开"/>
+                                            <Input value={motor2First} placeholder="输入3位整数" onChange={this.handleMotor2First} addonBefore="首开"/>
                                         </Col>
                                         <Col span={10}>
-                                            <Input value={motor2Second} placeholder="输入1～3位整数" onChange={this.handleMotor2Second} addonBefore="再开"/>
+                                            <Input value={motor2Second} placeholder="输入3位整数" onChange={this.handleMotor2Second} addonBefore="再开"/>
                                         </Col>
                                         <Col span={4}>
                                             <Button onClick={this.handleMotor2OpenTime} type="primary">
@@ -1103,7 +1103,7 @@ class Index extends Component {
                                     </Row>
                                     <Row gutter={24}>
                                         <Input.Search style={{width: '80%'}}
-                                                      placeholder='输入1～3位整数'
+                                                      placeholder='输入3位整数'
                                                       enterButton="提交"
                                                       onSearch={this.handleServer1Time}/>
                                     </Row>
@@ -1134,7 +1134,7 @@ class Index extends Component {
                                     </Row>
                                     <Row gutter={24}>
                                         <Input.Search style={{width: '80%'}}
-                                                      placeholder='输入1～3位整数'
+                                                      placeholder='输入3位整数'
                                                       enterButton="提交"
                                                       onSearch={this.handleServer2Time}/>
                                     </Row>

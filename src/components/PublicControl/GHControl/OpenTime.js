@@ -55,7 +55,7 @@ class Index extends Component {
 
     handleInput1Change = (e) => {
         const value = e.target.value;
-        const valueReg =  new RegExp(/^[1-9][0-9]{0,2}$/);
+        const valueReg =  new RegExp(/^[0-9]{3}$/);
         let motor1AllTimeBoole = false;
         if (valueReg.test(value)) {
             motor1AllTimeBoole = true;
@@ -67,7 +67,7 @@ class Index extends Component {
     };
     handleInput2Change = (e) => {
         const value = e.target.value;
-        const valueReg =  new RegExp(/^[1-9][0-9]{0,2}$/);
+        const valueReg =  new RegExp(/^[0-9]{3}$/);
         let motor2AllTimeBoole = false;
         if (valueReg.test(value)) {
             motor2AllTimeBoole = true;
@@ -79,7 +79,7 @@ class Index extends Component {
     };
     handleInput3Change = (e) => {
         const value = e.target.value;
-        const valueReg =  new RegExp(/^[1-9][0-9]{0,2}$/);
+        const valueReg =  new RegExp(/^[0-9]{3}$/);
         let motor3AllTimeBoole = false;
         if (valueReg.test(value)) {
             motor3AllTimeBoole = true;
@@ -91,7 +91,7 @@ class Index extends Component {
     };
     handleInput4Change = (e) => {
         const value = e.target.value;
-        const valueReg =  new RegExp(/^[1-9][0-9]{0,2}$/);
+        const valueReg =  new RegExp(/^[0-9]{3}$/);
         let motor4AllTimeBoole = false;
         if (valueReg.test(value)) {
             motor4AllTimeBoole = true;
@@ -127,7 +127,7 @@ class Index extends Component {
                     <Col span={6}>
                         <Input
                             addonBefore='卷膜机1首开'
-                            placeholder="输入1～3位整数"
+                            placeholder="输入3位整数"
                             suffix={suffix1}
                             value={motor1AllTime}
                             onChange={this.handleInput1Change}
@@ -136,7 +136,7 @@ class Index extends Component {
                     <Col span={6}>
                         <Input
                             addonBefore='卷膜机1再开'
-                            placeholder="输入1～3位整数"
+                            placeholder="输入3位整数"
                             suffix={suffix2}
                             value={motor2AllTime}
                             onChange={this.handleInput2Change}
@@ -145,7 +145,7 @@ class Index extends Component {
                     <Col span={6}>
                         <Input
                             addonBefore='卷膜机2首开'
-                            placeholder="输入1～3位整数"
+                            placeholder="输入3位整数"
                             suffix={suffix3}
                             value={motor3AllTime}
                             onChange={this.handleInput3Change}
@@ -154,7 +154,7 @@ class Index extends Component {
                     <Col span={6}>
                         <Input
                             addonBefore='卷膜机2再开'
-                            placeholder="输入1～3位整数"
+                            placeholder="输入3位整数"
                             suffix={suffix4}
                             value={motor4AllTime}
                             onChange={this.handleInput4Change}
