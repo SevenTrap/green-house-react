@@ -164,7 +164,6 @@ class EditableTable extends Component {
 
         this.state = {
             data: [],
-            list: [],
             userNames: [],
             deviceIds: [],
             editingKey: '',
@@ -244,10 +243,10 @@ class EditableTable extends Component {
     };
     handleAdd = () => {
         const {data, count, editingKey} = this.state;
-
-        if (editingKey) {
+        if (editingKey !== "") {
             return false;
         }
+        // console.log(editingKey);
         const newData = {
             key: count,
             deviceId: '',
@@ -336,20 +335,6 @@ class EditableTable extends Component {
         })
     };
 
-    handleSearch = (value) => {
-        const {data} = this.state;
-        if (value === "") {
-            this.setState({
-                list: data
-            });
-            return false;
-        }
-        const newData = data.filter(item => (item.deviceId.indexOf(value) > -1) ? item : null);
-        this.setState({
-            list: newData
-        })
-    };
-
     componentDidMount() {
 
         const token = window.sessionStorage.getItem('token');
@@ -397,7 +382,6 @@ class EditableTable extends Component {
                 const deviceIds = result[0].map(item => item.deviceId);
                 this.setState({
                     data: result[0],
-                    list: result[0],
                     count: result[0].length,
                     userNames: userNames,
                     deviceIds: deviceIds,
@@ -413,7 +397,7 @@ class EditableTable extends Component {
     }
 
     render() {
-        const {isNew, userNames, list, isLoading} = this.state;
+        const {isNew, userNames, data, isLoading} = this.state;
         const components = {
             body: {
                 row: EditableFormRow,
@@ -446,14 +430,7 @@ class EditableTable extends Component {
         return (
             <div>
                 <Row gutter={24}>
-                    <Col span={6}>
-                        <Input.Search
-                            addonBefore='控制器ID'
-                            enterButton="搜索"
-                            onSearch={this.handleSearch}
-                        />
-                    </Col>
-                    <Col span={6} offset={12}>
+                    <Col span={6} offset={18}>
                         <Button onClick={this.handleAdd} type="primary" style={{float: 'right'}}>
                             <Icon type="plus-circle"/>新增设备
                         </Button>
@@ -465,7 +442,7 @@ class EditableTable extends Component {
                         components={components}
                         rowClassName='editable-row'
                         bordered
-                        dataSource={list}
+                        dataSource={data}
                         columns={columns}
                     />
                 </Spin>

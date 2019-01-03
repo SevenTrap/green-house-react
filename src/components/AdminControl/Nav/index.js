@@ -32,6 +32,9 @@ class Index extends Component {
                     <Menu.Item key="equipment">
                         <Link to="/admin/equip"><Icon type="radar-chart"/>设备管理</Link>
                     </Menu.Item>
+                    <Menu.Item key="control">
+                        <Link to="/admin/control"><Icon type="radar-chart"/>设备监控</Link>
+                    </Menu.Item>
                     <Menu.Item key="record">
                         <Link to="/admin/record"><Icon type="radar-chart"/>维修记录</Link>
                     </Menu.Item>

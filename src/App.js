@@ -9,6 +9,7 @@ import AdminUser from './components/AdminControl/UserControl';
 import AdminEquip from './components/AdminControl/EquipmentControl';
 import AdminRecord from './components/AdminControl/Record';
 import AdminRainInfo from './components/AdminControl/RainInfo';
+import AdminControl from './components/AdminControl/Control';
 
 /*用户系统*/
 import PrivatePublicRoute from './PrivatePublicRoute';
@@ -33,6 +34,7 @@ class App extends Component {
                     <PrivateAdminRoute path="/admin/equip" component={AdminEquip}/>
                     <PrivateAdminRoute path="/admin/record" component={AdminRecord}/>
                     <PrivateAdminRoute path="/admin/raininfo" component={AdminRainInfo}/>
+                    <PrivateAdminRoute path="/admin/control" component={AdminControl}/>
 
                     <Route path="/public/Login" component={PublicLogin}/>
                     <PrivatePublicRoute path="/public/GHAdd" component={GHAdd}/>
