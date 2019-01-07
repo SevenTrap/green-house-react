@@ -64,11 +64,11 @@ class Index extends Component {
                         <Remote deviceIds={deviceIds}/>
                         <Clock deviceIds={deviceIds}/>
                         <TimeOut deviceIds={deviceIds}/>
-                        <TotalTime deviceIds={deviceIds}/>
+                        {/*<TotalTime deviceIds={deviceIds}/>*/}
                         <OverCurrent deviceIds={deviceIds}/>
                         <TempSetting deviceIds={deviceIds}/>
-                        <ValveFan deviceIds={deviceIds}/>
                         <OpenTime deviceIds={deviceIds}/>
+                        <ValveFan deviceIds={deviceIds}/>
                     </Card>
                 </Row>
             </Spin>

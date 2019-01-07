@@ -17,6 +17,81 @@ class Index extends Component {
             clock: ''
         }
     }
+
+    handleServer1Control = (e) => {
+        const value = e.target.value;
+        const {deviceIdStatus} = this.state;
+        const {deviceId} = this.props;
+        let actionItem = [{
+            deviceId: deviceId,
+            commandtype: '17',
+            action: `${value}`
+        }];
+        const token = window.sessionStorage.getItem('token');
+        const urlAction = 'http://47.92.206.44:80/api/action';
+        let options = {
+            method: 'POST',
+            body: JSON.stringify(actionItem),
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'authorization': 'Bearer ' + token
+            }
+        };
+        console.log(actionItem);
+        fetch(urlAction, options)
+            .then(response => response.status)
+            .then((status) => {
+                console.log(status);
+                message.success('命令下发成功');
+                this.setState({
+                    deviceIdStatus: {
+                        ...deviceIdStatus,
+                        serve_1_act: value
+                    }
+                })
+            })
+            .catch(() => {
+                message.error('命令下发失败');
+            })
+    };
+    handleServer2Control = (e) => {
+        const value = e.target.value;
+        const {deviceIdStatus} = this.state;
+        const {deviceId} = this.props;
+        let actionItem = [{
+            deviceId: deviceId,
+            commandtype: '18',
+            action: `${value}`
+        }];
+        const token = window.sessionStorage.getItem('token');
+        const urlAction = 'http://47.92.206.44:80/api/action';
+        let options = {
+            method: 'POST',
+            body: JSON.stringify(actionItem),
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'authorization': 'Bearer ' + token
+            }
+        };
+        console.log(actionItem);
+        fetch(urlAction, options)
+            .then(response => response.status)
+            .then((status) => {
+                console.log(status);
+                message.success('命令下发成功');
+                this.setState({
+                    deviceIdStatus: {
+                        ...deviceIdStatus,
+                        serve_2_act: value
+                    }
+                })
+            })
+            .catch(() => {
+                message.error('命令下发失败');
+            })
+    };
     handleMotor1Control = (e) => {
         const value = e.target.value;
         const {deviceIdStatus} = this.state;
@@ -56,7 +131,7 @@ class Index extends Component {
             })
     };
     handleMotor1Range = (value) => {
-        const valueReg =  new RegExp(/^[0-9]{3}$/);
+        const valueReg = new RegExp(/^[0-9]{3}$/);
         if (!valueReg.test(value)) {
             message.warning('请输入正确的参数');
             return false;
@@ -100,7 +175,7 @@ class Index extends Component {
             })
     };
     handleMotor1Over = (value) => {
-        const valueReg =  new RegExp(/^[1-9]$/);
+        const valueReg = new RegExp(/^[1-9]$/);
         if (!valueReg.test(value)) {
             message.warning('请输入正确的参数');
             return false;
@@ -155,7 +230,7 @@ class Index extends Component {
         })
     };
     handleMotor1OpenTime = () => {
-        const valueReg =  new RegExp(/^[0-9]{3}$/);
+        const valueReg = new RegExp(/^[0-9]{3}$/);
         const {deviceIdStatus, motor1First, motor1Second} = this.state;
         const {deviceId} = this.props;
         if (!valueReg.test(motor1First) || !valueReg.test(motor1Second)) {
@@ -212,8 +287,8 @@ class Index extends Component {
             motor1Min: e.target.value
         })
     };
-    handleMotor1Temp= () => {
-        const valueReg =  new RegExp(/^([0-9]|[1-5][0-9]|60)$/);
+    handleMotor1Temp = () => {
+        const valueReg = new RegExp(/^([0-9]|[1-5][0-9]|60)$/);
         const {deviceIdStatus, motor1Max, motor1Min} = this.state;
         const {deviceId} = this.props;
         if (!valueReg.test(motor1Max) || !valueReg.test(motor1Min)) {
@@ -267,7 +342,7 @@ class Index extends Component {
             })
     };
     handleServer1Time = (value) => {
-        const valueReg =  new RegExp(/^[0-9]{3}$/);
+        const valueReg = new RegExp(/^[0-9]{3}$/);
         if (!valueReg.test(value)) {
             message.warning('请输入正确的参数');
             return false;
@@ -350,7 +425,7 @@ class Index extends Component {
             })
     };
     handleMotor2Range = (value) => {
-        const valueReg =  new RegExp(/^[0-9]{3}$/);
+        const valueReg = new RegExp(/^[0-9]{3}$/);
         if (!valueReg.test(value)) {
             message.warning('请输入正确的参数');
             return false;
@@ -394,7 +469,7 @@ class Index extends Component {
             })
     };
     handleMotor2Over = (value) => {
-        const valueReg =  new RegExp(/^[1-9]$/);
+        const valueReg = new RegExp(/^[1-9]$/);
         if (!valueReg.test(value)) {
             message.warning('请输入正确的参数');
             return false;
@@ -449,7 +524,7 @@ class Index extends Component {
         })
     };
     handleMotor2OpenTime = () => {
-        const valueReg =  new RegExp(/^[0-9]{3}$/);
+        const valueReg = new RegExp(/^[0-9]{3}$/);
         const {deviceIdStatus, motor2First, motor2Second} = this.state;
         const {deviceId} = this.props;
         if (!valueReg.test(motor2First) || !valueReg.test(motor2Second)) {
@@ -506,8 +581,8 @@ class Index extends Component {
             motor2Min: e.target.value
         })
     };
-    handleMotor2Temp= () => {
-        const valueReg =  new RegExp(/^([0-9]|[1-5][0-9]|60)$/);
+    handleMotor2Temp = () => {
+        const valueReg = new RegExp(/^([0-9]|[1-5][0-9]|60)$/);
         const {deviceIdStatus, motor2Max, motor2Min} = this.state;
         const {deviceId} = this.props;
         if (!valueReg.test(motor2Max) || !valueReg.test(motor2Min)) {
@@ -561,7 +636,7 @@ class Index extends Component {
             })
     };
     handleServer2Time = (value) => {
-        const valueReg =  new RegExp(/^[0-9]{3}$/);
+        const valueReg = new RegExp(/^[0-9]{3}$/);
         if (!valueReg.test(value)) {
             message.warning('请输入正确的参数');
             return false;
@@ -667,7 +742,7 @@ class Index extends Component {
             })
     };
     handleTimeOut = (value) => {
-        const valueReg =  new RegExp(/^[0-9]{3}$/);
+        const valueReg = new RegExp(/^[0-9]{3}$/);
         if (!valueReg.test(value)) {
             message.warning('请输入正确的参数');
             return false;
@@ -707,6 +782,7 @@ class Index extends Component {
                 message.error('命令下发失败');
             })
     };
+
     componentDidMount() {
         const {deviceId} = this.props;
         const token = window.sessionStorage.getItem('token');
@@ -830,7 +906,8 @@ class Index extends Component {
                     <Col span={12}>
                         <Card.Grid style={{width: '100%', textAlign: 'center'}}>
                             <Row gutter={24}>
-                                <strong>定时闹钟(目前：<span style={{color: 'red'}}>{clock}</span>) &nbsp;&nbsp; (例如：0930)</strong>
+                                <strong>定时闹钟(目前：<span
+                                    style={{color: 'red'}}>{clock}</span>) &nbsp;&nbsp; (例如：0930)</strong>
                             </Row>
                             <Row gutter={24}>
                                 <Col span={12}>
@@ -876,28 +953,34 @@ class Index extends Component {
                     {greenHousePos0 ?
                         <Col span={12}>
                             <Card title={`卷膜机1 | ${greenHousePos0}`}>
-                                <Card.Grid style={{width: '100%', textAlign: 'center'}}>
-                                    <Radio.Group value={String(motor_1_act)}
-                                                 onChange={this.handleMotor1Control}>
-                                        <Radio.Button value='0'>上升</Radio.Button>
-                                        <Radio.Button value='2'>停止</Radio.Button>
-                                        <Radio.Button value='1'>下降</Radio.Button>
-                                    </Radio.Group>
-                                </Card.Grid>
                                 <Card.Grid style={{width: '50%', textAlign: 'center'}}>
                                     <Row gutter={24}>
-                                        <strong>行程时间(目前：<span style={{color: 'red'}}>{`${motor_1_range}`}</span> 秒)</strong>
+                                        <strong>卷膜机1控制</strong>
                                     </Row>
                                     <Row gutter={24}>
-                                        <Input.Search style={{width: '80%'}}
-                                                      placeholder='输入3位整数'
-                                                      enterButton="提交"
-                                                      onSearch={this.handleMotor1Range}/>
+                                        <Radio.Group value={String(motor_1_act)}
+                                                     onChange={this.handleMotor1Control}>
+                                            <Radio.Button value='0'>上升</Radio.Button>
+                                            <Radio.Button value='2'>停止</Radio.Button>
+                                            <Radio.Button value='1'>下降</Radio.Button>
+                                        </Radio.Group>
                                     </Row>
                                 </Card.Grid>
+                                {/*<Card.Grid style={{width: '50%', textAlign: 'center'}}>*/}
+                                {/*<Row gutter={24}>*/}
+                                {/*<strong>行程时间(目前：<span style={{color: 'red'}}>{`${motor_1_range}`}</span> 秒)</strong>*/}
+                                {/*</Row>*/}
+                                {/*<Row gutter={24}>*/}
+                                {/*<Input.Search style={{width: '80%'}}*/}
+                                {/*placeholder='输入3位整数'*/}
+                                {/*enterButton="提交"*/}
+                                {/*onSearch={this.handleMotor1Range}/>*/}
+                                {/*</Row>*/}
+                                {/*</Card.Grid>*/}
                                 <Card.Grid style={{width: '50%', textAlign: 'center'}}>
                                     <Row gutter={24}>
-                                        <strong>过流保护(目前：<span style={{color: 'red'}}>{`${motor_1_over}`}</span> 安培)</strong>
+                                        <strong>过流保护(目前：<span
+                                            style={{color: 'red'}}>{`${motor_1_over}`}</span> 安培)</strong>
                                     </Row>
                                     <Row gutter={24}>
                                         <Input.Search style={{width: '80%'}}
@@ -917,10 +1000,12 @@ class Index extends Component {
                                     </Row>
                                     <Row gutter={24}>
                                         <Col span={10}>
-                                            <Input value={motor1First} placeholder="输入3位整数" onChange={this.handleMotor1First} addonBefore="首开"/>
+                                            <Input value={motor1First} placeholder="输入3位整数"
+                                                   onChange={this.handleMotor1First} addonBefore="首开"/>
                                         </Col>
                                         <Col span={10}>
-                                            <Input value={motor1Second} placeholder="输入3位整数" onChange={this.handleMotor1Second} addonBefore="再开"/>
+                                            <Input value={motor1Second} placeholder="输入3位整数"
+                                                   onChange={this.handleMotor1Second} addonBefore="再开"/>
                                         </Col>
                                         <Col span={4}>
                                             <Button onClick={this.handleMotor1OpenTime} type="primary">
@@ -936,28 +1021,34 @@ class Index extends Component {
                     {greenHousePos1 ?
                         <Col span={12}>
                             <Card title={`卷膜机2 | ${greenHousePos1}`}>
-                                <Card.Grid style={{width: '100%', textAlign: 'center'}}>
-                                    <Radio.Group value={String(motor_2_act)}
-                                                 onChange={this.handleMotor2Control}>
-                                        <Radio.Button value='0'>上升</Radio.Button>
-                                        <Radio.Button value='2'>停止</Radio.Button>
-                                        <Radio.Button value='1'>下降</Radio.Button>
-                                    </Radio.Group>
-                                </Card.Grid>
                                 <Card.Grid style={{width: '50%', textAlign: 'center'}}>
                                     <Row gutter={24}>
-                                        <strong>行程时间(目前：<span style={{color: 'red'}}>{`${motor_2_range}`}</span> 秒)</strong>
+                                        <strong>卷膜机1控制</strong>
                                     </Row>
                                     <Row gutter={24}>
-                                        <Input.Search style={{width: '80%'}}
-                                                      placeholder='输入3位整数'
-                                                      enterButton="提交"
-                                                      onSearch={this.handleMotor2Range}/>
+                                        <Radio.Group value={String(motor_2_act)}
+                                                     onChange={this.handleMotor2Control}>
+                                            <Radio.Button value='0'>上升</Radio.Button>
+                                            <Radio.Button value='2'>停止</Radio.Button>
+                                            <Radio.Button value='1'>下降</Radio.Button>
+                                        </Radio.Group>
                                     </Row>
                                 </Card.Grid>
+                                {/*<Card.Grid style={{width: '50%', textAlign: 'center'}}>*/}
+                                {/*<Row gutter={24}>*/}
+                                {/*<strong>行程时间(目前：<span style={{color: 'red'}}>{`${motor_2_range}`}</span> 秒)</strong>*/}
+                                {/*</Row>*/}
+                                {/*<Row gutter={24}>*/}
+                                {/*<Input.Search style={{width: '80%'}}*/}
+                                {/*placeholder='输入3位整数'*/}
+                                {/*enterButton="提交"*/}
+                                {/*onSearch={this.handleMotor2Range}/>*/}
+                                {/*</Row>*/}
+                                {/*</Card.Grid>*/}
                                 <Card.Grid style={{width: '50%', textAlign: 'center'}}>
                                     <Row gutter={24}>
-                                        <strong>过流保护(目前：<span style={{color: 'red'}}>{`${motor_2_over}`}</span> 安培)</strong>
+                                        <strong>过流保护(目前：<span
+                                            style={{color: 'red'}}>{`${motor_2_over}`}</span> 安培)</strong>
                                     </Row>
                                     <Row gutter={24}>
                                         <Input.Search style={{width: '80%'}}
@@ -977,10 +1068,12 @@ class Index extends Component {
                                     </Row>
                                     <Row gutter={24}>
                                         <Col span={10}>
-                                            <Input value={motor2First} placeholder="输入3位整数" onChange={this.handleMotor2First} addonBefore="首开"/>
+                                            <Input value={motor2First} placeholder="输入3位整数"
+                                                   onChange={this.handleMotor2First} addonBefore="首开"/>
                                         </Col>
                                         <Col span={10}>
-                                            <Input value={motor2Second} placeholder="输入3位整数" onChange={this.handleMotor2Second} addonBefore="再开"/>
+                                            <Input value={motor2Second} placeholder="输入3位整数"
+                                                   onChange={this.handleMotor2Second} addonBefore="再开"/>
                                         </Col>
                                         <Col span={4}>
                                             <Button onClick={this.handleMotor2OpenTime} type="primary">
@@ -1022,10 +1115,12 @@ class Index extends Component {
                                     </Row>
                                     <Row gutter={24}>
                                         <Col span={10}>
-                                            <Input value={motor1Max} placeholder="0～60" onChange={this.handleMotor1Max} addonBefore="上限"/>
+                                            <Input value={motor1Max} placeholder="0～60" onChange={this.handleMotor1Max}
+                                                   addonBefore="上限"/>
                                         </Col>
                                         <Col span={10}>
-                                            <Input value={motor1Min} placeholder="0～60" onChange={this.handleMotor1Min} addonBefore="下限"/>
+                                            <Input value={motor1Min} placeholder="0～60" onChange={this.handleMotor1Min}
+                                                   addonBefore="下限"/>
                                         </Col>
                                         <Col span={4}>
                                             <Button onClick={this.handleMotor1Temp} type="primary">
@@ -1065,10 +1160,12 @@ class Index extends Component {
                                     </Row>
                                     <Row gutter={24}>
                                         <Col span={10}>
-                                            <Input value={motor2Max} placeholder="0～60" onChange={this.handleMotor2Max} addonBefore="上限"/>
+                                            <Input value={motor2Max} placeholder="0～60" onChange={this.handleMotor2Max}
+                                                   addonBefore="上限"/>
                                         </Col>
                                         <Col span={10}>
-                                            <Input value={motor2Min} placeholder="0～60" onChange={this.handleMotor2Min} addonBefore="下限"/>
+                                            <Input value={motor2Min} placeholder="0～60" onChange={this.handleMotor2Min}
+                                                   addonBefore="下限"/>
                                         </Col>
                                         <Col span={4}>
                                             <Button onClick={this.handleMotor2Temp} type="primary">
@@ -1099,7 +1196,8 @@ class Index extends Component {
                                 </Card.Grid>
                                 <Card.Grid style={{width: '50%', textAlign: 'center'}}>
                                     <Row gutter={24}>
-                                        <strong>阀门时间(目前：<span style={{color: 'red'}}>{`${serve_1_timer}`}</span> 分钟)</strong>
+                                        <strong>阀门时间(目前：<span
+                                            style={{color: 'red'}}>{`${serve_1_timer}`}</span> 分钟)</strong>
                                     </Row>
                                     <Row gutter={24}>
                                         <Input.Search style={{width: '80%'}}
@@ -1130,7 +1228,8 @@ class Index extends Component {
                                 </Card.Grid>
                                 <Card.Grid style={{width: '50%', textAlign: 'center'}}>
                                     <Row gutter={24}>
-                                        <strong>风机时间(目前：<span style={{color: 'red'}}>{`${serve_2_timer}`}</span> 分钟)</strong>
+                                        <strong>风机时间(目前：<span
+                                            style={{color: 'red'}}>{`${serve_2_timer}`}</span> 分钟)</strong>
                                     </Row>
                                     <Row gutter={24}>
                                         <Input.Search style={{width: '80%'}}
