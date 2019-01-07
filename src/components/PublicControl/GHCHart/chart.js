@@ -91,11 +91,25 @@ class Index extends Component {
                     });
                     return false;
                 }
-                const hum1 = result.map(item => Number(item.hum1));
-                const hum2 = result.map(item => Number(item.hum2));
-                const temp1 = result.map(item => Number(item.temp1 / 10));
-                const temp2 = result.map(item => Number(item.temp2 / 10));
-                const time = result.map(item => `${item.insert_time[0]}${item.insert_time[1]}${item.insert_time[2]}${item.insert_time[3]}-${item.insert_time[4]}${item.insert_time[5]}-${item.insert_time[6]}${item.insert_time[7]} ${item.insert_time[8]}${item.insert_time[9]}:${item.insert_time[10]}${item.insert_time[11]}:${item.insert_time[12]}${item.insert_time[13]}`);
+                let hum1 = [];
+                let hum2 = [];
+                let temp1 = [];
+                let temp2 = [];
+                let time = [];
+                for (let i = 0; i < result.length; i++) {
+                    let item1 = Number(result[i].hum1);
+                    let item2 = Number(result[i].hum2);
+                    let item3 = Number(result[i].temp1 / 10);
+                    let item4 = Number(result[i].temp2 / 10);
+                    let item5 = `${result[i].insert_time[0]}${result[i].insert_time[1]}${result[i].insert_time[2]}${result[i].insert_time[3]}-${result[i].insert_time[4]}${result[i].insert_time[5]}-${result[i].insert_time[6]}${result[i].insert_time[7]} ${result[i].insert_time[8]}${result[i].insert_time[9]}:${result[i].insert_time[10]}${result[i].insert_time[11]}:${result[i].insert_time[12]}${result[i].insert_time[13]}`;
+                    if (item1 > 0 && item2 > 0 && item1 <= 100 && item2 <= 100 && item3 > -30 && item4 > -30 && item3 < 60 && item4 < 60) {
+                        hum1.push(item1);
+                        hum2.push(item2);
+                        temp1.push(item3);
+                        temp2.push(item4);
+                        time.push(item5);
+                    }
+                }
                 this.setState({
                     humi1: hum1,
                     humi2: hum2,
