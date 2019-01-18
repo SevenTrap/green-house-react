@@ -52,8 +52,8 @@ class Index extends Component {
                 result[1].map((item, index) => item.key = index);
                 const deviceID_off = result[1].filter(item => item.is_online === "0");
                 const deviceID_on = result[1].filter(item => item.is_online === "1");
-                const deviceID_over = deviceID_on.filter(item => (Number(item.temp1) > (Number(item.motor_1_max) + 5) || Number(item.temp2) > (Number(item.motor_2_max) + 5)));
-                const deviceID_down = deviceID_on.filter(item => (Number(item.temp1) < (Number(item.motor_1_min) - 5) || Number(item.temp2) < (Number(item.motor_2_min) - 5)));
+                const deviceID_over = deviceID_on.filter(item => (Number(item.temp1) > (Number(item.motor_1_max) + 50) || Number(item.temp2) > (Number(item.motor_2_max) + 50)));
+                const deviceID_down = deviceID_on.filter(item => (Number(item.temp1) < (Number(item.motor_1_min) - 50) || Number(item.temp2) < (Number(item.motor_2_min) - 50)));
                 console.log(deviceID_off, deviceID_on, deviceID_over, deviceID_down);
                 this.setState({
                     deviceID_over: deviceID_over,
@@ -140,6 +140,8 @@ class Index extends Component {
                                     const temp2 = Number(item.temp2) / 10;
                                     const motor_1_max = Number(item.motor_1_max) / 10;
                                     const motor_2_max = Number(item.motor_2_max) / 10;
+                                    const motor_1_min = Number(item.motor_1_min) / 10;
+                                    const motor_2_min = Number(item.motor_2_min) / 10;
                                     return (
                                         <Card.Grid bordered={true} style={{width: "50%"}}>
                                             <Col span={12}>用户名：{deviceID_only.username}</Col>
@@ -148,6 +150,8 @@ class Index extends Component {
                                             <Col span={12}>实时温度2：<strong style={{color: 'red'}}>{temp2}</strong> ℃</Col>
                                             <Col span={12}>温度上限1：<strong style={{color: 'red'}}>{motor_1_max}</strong> ℃</Col>
                                             <Col span={12}>温度上限2：<strong style={{color: 'red'}}>{motor_2_max}</strong> ℃</Col>
+                                            <Col span={12}>温度下限1：<strong style={{color: 'red'}}>{motor_1_min}</strong> ℃</Col>
+                                            <Col span={12}>温度下限2：<strong style={{color: 'red'}}>{motor_2_min}</strong> ℃</Col>
                                         </Card.Grid>
                                     )
                                 })}
@@ -165,6 +169,8 @@ class Index extends Component {
                                     }
                                     const temp1 = Number(item.temp1) / 10;
                                     const temp2 = Number(item.temp2) / 10;
+                                    const motor_1_max = Number(item.motor_1_max) / 10;
+                                    const motor_2_max = Number(item.motor_2_max) / 10;
                                     const motor_1_min = Number(item.motor_1_min) / 10;
                                     const motor_2_min = Number(item.motor_2_min) / 10;
                                     return (
@@ -173,6 +179,8 @@ class Index extends Component {
                                             <Col span={12}>控制器ID：{deviceID_only.deviceId}</Col>
                                             <Col span={12}>实时温度1：<strong style={{color: 'red'}}>{temp1}</strong> ℃</Col>
                                             <Col span={12}>实时温度2：<strong style={{color: 'red'}}>{temp2}</strong> ℃</Col>
+                                            <Col span={12}>温度上限1：<strong style={{color: 'red'}}>{motor_1_max}</strong> ℃</Col>
+                                            <Col span={12}>温度上限2：<strong style={{color: 'red'}}>{motor_2_max}</strong> ℃</Col>
                                             <Col span={12}>温度下限1：<strong style={{color: 'red'}}>{motor_1_min}</strong> ℃</Col>
                                             <Col span={12}>温度下限2：<strong style={{color: 'red'}}>{motor_2_min}</strong> ℃</Col>
                                         </Card.Grid>

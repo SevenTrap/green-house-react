@@ -308,7 +308,7 @@ class Index extends Component {
         let actionItem = [{
             deviceId: deviceId,
             commandtype: '08',
-            action: `${temp1} ${temp2} ${motor_2_max} ${motor_2_min}`
+            action: `1 ${temp1} ${temp2} ${motor_2_max} ${motor_2_min}`
         }];
         const token = window.sessionStorage.getItem('token');
         const urlAction = 'http://47.92.206.44:80/api/action';
@@ -602,7 +602,7 @@ class Index extends Component {
         let actionItem = [{
             deviceId: deviceId,
             commandtype: '08',
-            action: `${motor_1_max} ${motor_1_min} ${temp1} ${temp2}`
+            action: `1 ${motor_1_max} ${motor_1_min} ${temp1} ${temp2}`
         }];
         const token = window.sessionStorage.getItem('token');
         const urlAction = 'http://47.92.206.44:80/api/action';

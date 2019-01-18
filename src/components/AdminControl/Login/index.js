@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Form, Icon, Input, Button, Radio, message} from 'antd';
+import {Form, Icon, Input, Button, Radio, message, Tooltip} from 'antd';
 import {withRouter, Link} from 'react-router-dom';
 import TopLeft from '../../../top-left.png';
 
@@ -83,7 +83,7 @@ class NormalLoginForm extends Component {
                                     <Input prefix={<Icon type="lock" style={{color: 'rgba(0, 0, 0, .25)'}}/>} type="password" placeholder="管理员密码"/>
                                 )}
                             </FormItem>
-                            <a className="login-form-forgot" href="/">忘记密码 ？</a>
+                            <Tooltip placement='bottom' title={`请拨打电话：13311398425`}><Button style={{marginBottom: '10px'}}>忘记密码？</Button></Tooltip>
                             <Button type="primary" htmlType="submit" className="login-form-button">
                                 登 陆
                             </Button>
@@ -91,7 +91,7 @@ class NormalLoginForm extends Component {
                     </div>
                 </div>
                 <footer>
-                    北京华雨奥博农业科技有限公司 &copy; 版权所有
+                    北京华雨奥博农业科技有限公司 &copy; 版权所有 | <a target={'_blank'} style={{color: '#333'}} href={'http://www.miibeian.gov.cn/'}>京ICP备18062887号-1</a>
                 </footer>
             </div>
         )
