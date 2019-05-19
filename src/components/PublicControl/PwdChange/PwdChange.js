@@ -28,7 +28,7 @@ class Index extends Component {
         }
         const token = window.sessionStorage.getItem('token');
         const username = window.sessionStorage.getItem('Username');
-        const url = 'http://47.92.206.44:80/api/user';
+        const url = 'https://in.huayuaobo.com:16400/api/user';
         let newItem = {
             username: username,
             password: password2,

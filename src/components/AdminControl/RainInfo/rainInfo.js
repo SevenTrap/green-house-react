@@ -204,7 +204,7 @@ class EditableTable extends Component {
         const item = data[index].rainId;
         const deleteUserName = data[index].username;
         const token = window.sessionStorage.getItem('token');
-        const url = 'http://47.92.206.44:80/api/raininfo/' + item;
+        const url = 'https://in.huayuaobo.com:16400/api/raininfo/' + item;
         const opts = {
             method: 'DELETE',
             body: JSON.stringify(item),
@@ -295,7 +295,7 @@ class EditableTable extends Component {
             }
 
             const token = window.sessionStorage.getItem('token');
-            const url = 'http://47.92.206.44:80/api/raininfo/' + newItem.rainId;
+            const url = 'https://in.huayuaobo.com:16400/api/raininfo/' + newItem.rainId;
             const opts = {
                 method: 'PUT',
                 body: JSON.stringify(saveItem),
@@ -340,8 +340,8 @@ class EditableTable extends Component {
 
     componentDidMount() {
         const token = window.sessionStorage.getItem('token');
-        const urlUser = 'http://47.92.206.44:80/api/user';
-        const urlRainInfo = 'http://47.92.206.44:80/api/raininfo';
+        const urlUser = 'https://in.huayuaobo.com:16400/api/user';
+        const urlRainInfo = 'https://in.huayuaobo.com:16400/api/raininfo';
         const option = {
             method: 'GET',
             headers: {

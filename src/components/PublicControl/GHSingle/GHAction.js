@@ -15,7 +15,7 @@ class Index extends Component {
     componentDidMount() {
         const {greenHouseId} = this.props;
         const token = window.sessionStorage.getItem('token');
-        const urlGreenHouseMap = 'http://47.92.206.44:80/api/greenhousemap/' + greenHouseId;
+        const urlGreenHouseMap = 'https://in.huayuaobo.com:16400/api/greenhousemap/' + greenHouseId;
         const opts = {
             method: 'GET',
             headers: {

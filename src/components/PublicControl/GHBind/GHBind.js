@@ -263,7 +263,7 @@ class EditableTable extends Component {
         };
         let greenHouseIdAndPosItem = `${item.greenHouseId} ${item.greenHousePos}`;
         let deviceIdAndPosItem = `${item.deviceId} ${item.devicePos} ${key}`;
-        const url = 'http://47.92.206.44:80/api/greenhousemap';
+        const url = 'https://in.huayuaobo.com:16400/api/greenhousemap';
         const opts = {
             method: 'DELETE',
             body: JSON.stringify(deleteItem),
@@ -365,7 +365,7 @@ class EditableTable extends Component {
         }
 
         const token = window.sessionStorage.getItem('token');
-        const url = 'http://47.92.206.44:80/api/greenhousemap/' + greenHouseId;
+        const url = 'https://in.huayuaobo.com:16400/api/greenhousemap/' + greenHouseId;
         const opts = {
             method: 'PATCH',
             body: JSON.stringify(newItem),
@@ -432,7 +432,7 @@ class EditableTable extends Component {
         }
 
         const token = window.sessionStorage.getItem('token');
-        const url = 'http://47.92.206.44:80/api/greenhousemap/' + greenHouseId;
+        const url = 'https://in.huayuaobo.com:16400/api/greenhousemap/' + greenHouseId;
         const opts = {
             method: 'PATCH',
             body: JSON.stringify(newItem),
@@ -468,9 +468,9 @@ class EditableTable extends Component {
 
     componentDidMount() {
         const token = window.sessionStorage.getItem('token');
-        const urlGreenHouseMap = 'http://47.92.206.44:80/api/greenhousemap';
-        const urlGreenHouse = 'http://47.92.206.44:80/api/greenhouse';
-        const urlDevice = 'http://47.92.206.44:80/api/device';
+        const urlGreenHouseMap = 'https://in.huayuaobo.com:16400/api/greenhousemap';
+        const urlGreenHouse = 'https://in.huayuaobo.com:16400/api/greenhouse';
+        const urlDevice = 'https://in.huayuaobo.com:16400/api/device';
         const opts = {
             method: 'GET',
             headers: {

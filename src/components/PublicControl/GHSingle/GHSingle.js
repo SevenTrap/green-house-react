@@ -14,7 +14,7 @@ class Index extends Component {
 
     componentDidMount() {
         const token = window.sessionStorage.getItem('token');
-        const urlGreenHouse = 'http://47.92.206.44:80/api/greenhouse';
+        const urlGreenHouse = 'https://in.huayuaobo.com:16400/api/greenhouse';
         const opts = {
             method: 'GET',
             headers: {

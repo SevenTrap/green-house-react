@@ -11,7 +11,7 @@ class NormalLoginForm extends Component {
         event.preventDefault();
         this.props.form.validateFields((err, values) => {
             if (!err) {
-                const url = 'http://47.92.206.44:80/api/login';
+                const url = 'https://in.huayuaobo.com:16400/api/login';
                 const opts = {
                     method: 'POST',
                     body: JSON.stringify(values),

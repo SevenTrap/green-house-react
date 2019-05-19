@@ -41,7 +41,7 @@ class Index extends Component {
     handlePush = () => {
         this.props.form.validateFields((error, values) => {
             if (!error) {
-                const url = 'http://47.92.206.44:80/api/adminlog';
+                const url = 'https://in.huayuaobo.com:16400/api/adminlog';
                 const token = window.sessionStorage.getItem('token');
                 const opts = {
                     method: 'POST',
@@ -69,7 +69,7 @@ class Index extends Component {
         })
     };
     handleDelete = (key) => {
-        const url = `http://47.92.206.44:80/api/adminlog/${key}`;
+        const url = `https://in.huayuaobo.com:16400/api/adminlog/${key}`;
         const token = window.sessionStorage.getItem('token');
         const opts = {
             method: 'DELETE',
@@ -105,8 +105,8 @@ class Index extends Component {
 
     getData = () => {
         const token = window.sessionStorage.getItem('token');
-        const urlData = `http://47.92.206.44:80/api/adminlog`;
-        const urlDeviceId = `http://47.92.206.44:80/api/device`;
+        const urlData = `https://in.huayuaobo.com:16400/api/adminlog`;
+        const urlDeviceId = `https://in.huayuaobo.com:16400/api/device`;
         const options = {
             method: 'GET',
             headers: {

@@ -18,7 +18,7 @@ class NormalLoginForm extends Component {
                         'Content-Type': 'application/json'
                     }
                 };
-                fetch('http://47.92.206.44:80/api/login', opts)
+                fetch('https://in.huayuaobo.com:16400/api/login', opts)
                     .then(response => {
                         if (response.status === 200) {
                             return response.json()

@@ -21,8 +21,8 @@ class Index extends Component {
 
     getData = () => {
         const token = window.sessionStorage.getItem('token');
-        const deviceState = `http://47.92.206.44:80/api/devicestatus`;
-        const deviceID = `http://47.92.206.44:80/api/device`;
+        const deviceState = `https://in.huayuaobo.com:16400/api/devicestatus`;
+        const deviceID = `https://in.huayuaobo.com:16400/api/device`;
         const options = {
             method: 'GET',
             headers: {

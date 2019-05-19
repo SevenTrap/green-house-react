@@ -200,7 +200,7 @@ class EditableTable extends Component {
                 return false;
             }
             const token = window.sessionStorage.getItem('token');
-            const url = 'http://47.92.206.44:80/api/device/' + newItem.deviceId;
+            const url = 'https://in.huayuaobo.com:16400/api/device/' + newItem.deviceId;
             const opts = {
                 method: 'PUT',
                 body: JSON.stringify(saveItem),
@@ -235,8 +235,8 @@ class EditableTable extends Component {
 
     componentDidMount() {
         const token = window.sessionStorage.getItem('token');
-        const urlGetData = 'http://47.92.206.44:80/api/device';
-        const urlGetUser = 'http://47.92.206.44:80/api/raininfo';
+        const urlGetData = 'https://in.huayuaobo.com:16400/api/device';
+        const urlGetUser = 'https://in.huayuaobo.com:16400/api/raininfo';
         const options = {
             method: 'GET',
             headers: {

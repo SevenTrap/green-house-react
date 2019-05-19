@@ -38,7 +38,7 @@ class Index extends Component {
                     subject: values.subject,
                     description: values.description
                 };
-                const url = 'http://47.92.206.44:80/api/userlog';
+                const url = 'https://in.huayuaobo.com:16400/api/userlog';
                 const token = window.sessionStorage.getItem('token');
                 const opts = {
                     method: 'POST',
@@ -67,7 +67,7 @@ class Index extends Component {
         })
     };
     handleDelete = (key) => {
-        const url = `http://47.92.206.44:80/api/userlog/${key}`;
+        const url = `https://in.huayuaobo.com:16400/api/userlog/${key}`;
         const token = window.sessionStorage.getItem('token');
         const opts = {
             method: 'DELETE',
@@ -103,7 +103,7 @@ class Index extends Component {
 
     getData = () => {
         const token = window.sessionStorage.getItem('token');
-        const urlData = `http://47.92.206.44:80/api/userlog`;
+        const urlData = `https://in.huayuaobo.com:16400/api/userlog`;
         const options = {
             method: 'GET',
             headers: {

@@ -28,7 +28,7 @@ class Index extends Component {
             action: `${value}`
         }];
         const token = window.sessionStorage.getItem('token');
-        const urlAction = 'http://47.92.206.44:80/api/action';
+        const urlAction = 'https://in.huayuaobo.com:16400/api/action';
         let options = {
             method: 'POST',
             body: JSON.stringify(actionItem),
@@ -65,7 +65,7 @@ class Index extends Component {
             action: `${value}`
         }];
         const token = window.sessionStorage.getItem('token');
-        const urlAction = 'http://47.92.206.44:80/api/action';
+        const urlAction = 'https://in.huayuaobo.com:16400/api/action';
         let options = {
             method: 'POST',
             body: JSON.stringify(actionItem),
@@ -102,7 +102,7 @@ class Index extends Component {
             action: `${value} 2`
         }];
         const token = window.sessionStorage.getItem('token');
-        const urlAction = 'http://47.92.206.44:80/api/action';
+        const urlAction = 'https://in.huayuaobo.com:16400/api/action';
         let options = {
             method: 'POST',
             body: JSON.stringify(actionItem),
@@ -147,7 +147,7 @@ class Index extends Component {
         }];
         console.log(actionItem);
         const token = window.sessionStorage.getItem('token');
-        const urlAction = 'http://47.92.206.44:80/api/action';
+        const urlAction = 'https://in.huayuaobo.com:16400/api/action';
         let options = {
             method: 'POST',
             body: JSON.stringify(actionItem),
@@ -191,7 +191,7 @@ class Index extends Component {
             action: `${value} ${motor_2_over}`
         }];
         const token = window.sessionStorage.getItem('token');
-        const urlAction = 'http://47.92.206.44:80/api/action';
+        const urlAction = 'https://in.huayuaobo.com:16400/api/action';
         let options = {
             method: 'POST',
             body: JSON.stringify(actionItem),
@@ -247,7 +247,7 @@ class Index extends Component {
             action: `${motor1First} ${motor1Second} ${motor_2_first} ${motor_2_second}`
         }];
         const token = window.sessionStorage.getItem('token');
-        const urlAction = 'http://47.92.206.44:80/api/action';
+        const urlAction = 'https://in.huayuaobo.com:16400/api/action';
         let options = {
             method: 'POST',
             body: JSON.stringify(actionItem),
@@ -311,7 +311,7 @@ class Index extends Component {
             action: `1 ${temp1} ${temp2} ${motor_2_max} ${motor_2_min}`
         }];
         const token = window.sessionStorage.getItem('token');
-        const urlAction = 'http://47.92.206.44:80/api/action';
+        const urlAction = 'https://in.huayuaobo.com:16400/api/action';
         let options = {
             method: 'POST',
             body: JSON.stringify(actionItem),
@@ -358,7 +358,7 @@ class Index extends Component {
         }];
         console.log(actionItem);
         const token = window.sessionStorage.getItem('token');
-        const urlAction = 'http://47.92.206.44:80/api/action';
+        const urlAction = 'https://in.huayuaobo.com:16400/api/action';
         let options = {
             method: 'POST',
             body: JSON.stringify(actionItem),
@@ -396,7 +396,7 @@ class Index extends Component {
             action: `2 ${value}`
         }];
         const token = window.sessionStorage.getItem('token');
-        const urlAction = 'http://47.92.206.44:80/api/action';
+        const urlAction = 'https://in.huayuaobo.com:16400/api/action';
         let options = {
             method: 'POST',
             body: JSON.stringify(actionItem),
@@ -441,7 +441,7 @@ class Index extends Component {
         }];
         console.log(actionItem);
         const token = window.sessionStorage.getItem('token');
-        const urlAction = 'http://47.92.206.44:80/api/action';
+        const urlAction = 'https://in.huayuaobo.com:16400/api/action';
         let options = {
             method: 'POST',
             body: JSON.stringify(actionItem),
@@ -485,7 +485,7 @@ class Index extends Component {
             action: `${motor_1_over} ${value}`
         }];
         const token = window.sessionStorage.getItem('token');
-        const urlAction = 'http://47.92.206.44:80/api/action';
+        const urlAction = 'https://in.huayuaobo.com:16400/api/action';
         let options = {
             method: 'POST',
             body: JSON.stringify(actionItem),
@@ -541,7 +541,7 @@ class Index extends Component {
             action: `${motor_1_first} ${motor_1_second} ${motor2First} ${motor2Second}`
         }];
         const token = window.sessionStorage.getItem('token');
-        const urlAction = 'http://47.92.206.44:80/api/action';
+        const urlAction = 'https://in.huayuaobo.com:16400/api/action';
         let options = {
             method: 'POST',
             body: JSON.stringify(actionItem),
@@ -605,7 +605,7 @@ class Index extends Component {
             action: `1 ${motor_1_max} ${motor_1_min} ${temp1} ${temp2}`
         }];
         const token = window.sessionStorage.getItem('token');
-        const urlAction = 'http://47.92.206.44:80/api/action';
+        const urlAction = 'https://in.huayuaobo.com:16400/api/action';
         let options = {
             method: 'POST',
             body: JSON.stringify(actionItem),
@@ -652,7 +652,7 @@ class Index extends Component {
         }];
         console.log(actionItem);
         const token = window.sessionStorage.getItem('token');
-        const urlAction = 'http://47.92.206.44:80/api/action';
+        const urlAction = 'https://in.huayuaobo.com:16400/api/action';
         let options = {
             method: 'POST',
             body: JSON.stringify(actionItem),
@@ -715,7 +715,7 @@ class Index extends Component {
 
         console.log(actionItem);
         const token = window.sessionStorage.getItem('token');
-        const urlAction = 'http://47.92.206.44:80/api/action';
+        const urlAction = 'https://in.huayuaobo.com:16400/api/action';
         let options = {
             method: 'POST',
             body: JSON.stringify(actionItem),
@@ -756,7 +756,7 @@ class Index extends Component {
         }];
         console.log(actionItem);
         const token = window.sessionStorage.getItem('token');
-        const urlAction = 'http://47.92.206.44:80/api/action';
+        const urlAction = 'https://in.huayuaobo.com:16400/api/action';
         let options = {
             method: 'POST',
             body: JSON.stringify(actionItem),
@@ -786,7 +786,7 @@ class Index extends Component {
     componentDidMount() {
         const {deviceId} = this.props;
         const token = window.sessionStorage.getItem('token');
-        const urlDeviceStatus = `http://47.92.206.44:80/api/devicestatus/${deviceId}`;
+        const urlDeviceStatus = `https://in.huayuaobo.com:16400/api/devicestatus/${deviceId}`;
         const option = {
             method: 'GET',
             headers: {
